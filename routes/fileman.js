@@ -10,6 +10,10 @@ var archiver = require('archiver');
 
 var serverRoot = './public/';
 
+router.get('/', function(req, res, next) {
+  res.render('fileman', { title: 'Cover File Manager' });
+});
+
 /* List directory tree */
 router.post('/dirlist', function(req, res) {
   

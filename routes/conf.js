@@ -1,9 +1,8 @@
-var express = require('express');
-var router = express.Router();
-var config = require('../config/fileman.js');
+const express = require('express');
+const router = express.Router();
+const config = require('../config/fileman');
 
 router.get('/', function (req, res) {
-    console.log(config);
     res.json(config);
 });
 

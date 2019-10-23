@@ -1,4 +1,4 @@
-frontend = {
+const frontend = {
     "RETURN_URL_PREFIX":   "",
     "THUMBS_VIEW_WIDTH":   "140",
     "THUMBS_VIEW_HEIGHT":  "120",
