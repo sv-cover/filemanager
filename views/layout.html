@@ -3,9 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>{{title}}</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdl.svcover.nl/dist/v0.1/css/cdl.css" type="text/css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+	<nav class="navbar navbar-cover">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button class="navbar-toggle collapsed navicon-button" href="#navbar-main-collapse" data-toggle="collapse" aria-expanded="false" aria-controls="navbar-main-collapse">
+					<span class="navicon navicon-white"></span>
+				</button>
+				<a href="//www.svcover.nl/" class="navbar-logo"><img src="//cdl.svcover.nl/dist/v0.1/img/cover.png" alt="Cover"></a>
+				<a href="/" class="navbar-brand">Cover Fileman</a>
+			</div>
+			<div class="collapse navbar-collapse" id="navbar-main-collapse">
+				<ul class="navbar-right">
+                    <li {if $active_menu == 'login'}class="active"{/if}><a href="{rewrite url="login"}">Login</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
     {% block content %}
     {% endblock %}
 </body>
