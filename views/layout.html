@@ -20,7 +20,11 @@
 			</div>
 			<div class="collapse navbar-collapse" id="navbar-main-collapse">
 				<ul class="navbar-right">
-                    <li {if $active_menu == 'login'}class="active"{/if}><a href="{rewrite url="login"}">Login</a></li>
+				{% if loggedin %}
+					<li><a href="{{logoutURL}}">Logout</a></li>
+				{% else %}
+                    <li><a href="{{loginURL}}">Login</a></li>
+				{% endif %}
 				</ul>
 			</div>
 		</div>

@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var cons = require('consolidate');
 var nunjucks = require('nunjucks');
 var app = express();
+var coverapi = require('./coverapi');
 
 // add nunjucks to requires so filters can be
 // added and the same instance will be used inside the render method
@@ -32,18 +33,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// checks if the user is logged in to cover
+app.use('/', coverapi);
+
 app.use('/', routes);
 app.use('/conf.json', conf);
 app.use('/fileman', fileman);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
-
-// error handlers
 
 // development error handler
 // will print stacktrace
@@ -56,16 +51,5 @@ if (app.get('env') === 'development') {
     });
   });
 }
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
-
 
 module.exports = app;
