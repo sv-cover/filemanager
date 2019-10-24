@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const rp = require('request-promise-native');
 const config = require('../config/');
 const querystring = require('querystring');
+const dns = require('dns');
 
 app = config.COVER_API_APP;
 secret = config.COVER_API_SECRET;
@@ -25,10 +26,14 @@ function getCoverSession(sessionID) {
             json: true
         };
         rp(options).then(function (repos) {
-            resolve({
-                sessionID: sessionID,
-                user: repos.result
-            });
+            if (repos.succes == false) {
+                reject(repos);
+            } else {
+                resolve({
+                    sessionID: sessionID,
+                    user: repos.result
+                });
+            }
         }).catch(function (err) {
             reject(err);
         })
