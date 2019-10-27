@@ -29,7 +29,7 @@ function accessControl(req, res, p) {
 }
 
 router.use('/', function(req, res, next) {
-  if (req.session == null || req.session == undefined || req.session.user.committees != []) {
+  if (typeof req.session == undefined || req.session == null || Array.isArray(req.session.user.committees) || req.session.user.committees.length > 0) {
     res.status(403).send('You are not allowed to access Cover Fileman');
   } else {
     if (req.body.f != undefined) {
