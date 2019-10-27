@@ -7,7 +7,7 @@ config = {
     'COVER_API_APP': 'test-app',
     'COVER_API_SECRET': 'ultrasecrethashkey',
     /* General */
-    'DEBUG': true
+    'UPLOADS_FOLDER': 'uploads'
 }
 
 module.exports = config

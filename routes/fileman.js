@@ -7,13 +7,43 @@ var gm = require('gm');
 var exec = require('child_process').exec;
 var multer  = require('multer');
 var archiver = require('archiver');
+const config = require('../config');
 
 var serverRoot = './public/';
 
+function accessControl(req, res, p) {
+  let filesRoot = config.UPLOADS_FOLDER;
+  let committees = req.session.user.committees;
+  let commiteePath = '';
+  let response = false;
+
+  for (committeeID in committees) {
+    commiteePath = path.join(filesRoot, committeeID);
+    if (p.startsWith(commiteePath)) {
+      response = true;
+    }
+  }
+  if (!response) {
+    res.status(403).send('You are not allowed to access this file/folder.');
+  }
+}
+
 router.use('/', function(req, res, next) {
-  if (req.session == null || req.session == undefined) {
+  if (req.session == null || req.session == undefined || req.session.user.committees != []) {
     res.status(403).send('You are not allowed to access Cover Fileman');
   } else {
+    if (req.body.f != undefined) {
+      accessControl(req, res, req.body.f);
+    }
+    if (req.body.d != undefined) {
+      accessControl(req, res, req.body.d);
+    }
+    if (req.query.f != undefined) {
+      accessControl(req, res, req.query.f);
+    }
+    if (req.query.d != undefined) {
+      accessControl(req, res, req.query.d);
+    }
     next()
   }
 });
@@ -24,20 +54,25 @@ router.get('/', function(req, res, next) {
 
 /* List directory tree */
 router.post('/dirlist', function(req, res) {
-  
-  var response = [];  
-  var filesRoot = 'Uploads';
-  
-  getDirectories(filesRoot, response);
-  
+  let response = [];
+  let filesRoot = config.UPLOADS_FOLDER;
+  let committees = req.session.user.committees;
+
+  for (committeeID in committees) {
+    let responseTemp = [];
+    
+    getDirectories(path.join(filesRoot, committeeID), responseTemp);
+    response = response.concat(responseTemp);
+  }
+
   res.send(response);
 });
 
 /* List files in a directory */
 router.post('/fileslist', function(req, res) {
-  
   var response = [];
   var pathDir = serverRoot + req.body.d;
+
   fs.readdirSync(pathDir).map(function(file) {
     var fileDir = path.join(pathDir, file);
     var info = fs.statSync(fileDir); 
@@ -59,7 +94,6 @@ router.post('/fileslist', function(req, res) {
 
 /* Copying a file or directory */
 router.post('/copy', function(req, res) {
-  
   try {
     fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n));
     res.send({ res: "ok", msg: "Success" });
@@ -90,13 +124,11 @@ router.post('/delete', function(req, res) {
 
 /* Download file */
 router.get('/download', function(req, res) {
-  
   res.download(path.join(serverRoot, req.query.f));
 });
 
 /* Download directory */
 router.get('/downloaddir', function(req, res) {
-    
   res.setHeader('Content-disposition', 'attachment; filename=' + path.basename(req.query.d) + '.zip');
   
   var archive = archiver('zip');
@@ -109,7 +141,6 @@ router.get('/downloaddir', function(req, res) {
 
 /* Move a file or directory */
 router.post('/move', function(req, res) {
-  
   fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n), function (err) {
     if (err) {
         res.send({ res:"error", msg: err });
@@ -133,7 +164,6 @@ router.post('/rename', function(req, res) {
 
 /* Generate thumbnail */
 router.get('/generatethumb', function(req, res) {
-
   exec("gm -help", function (err) {
     if (err) {
       res.status(500).send({ error: 'GraphicsMagick is not installed' })
@@ -173,7 +203,6 @@ router.post('/upload', function(req, res) {
 });
 
 var getDirectories = function(srcpath, response) {
-  
   var info = {
     p: srcpath.replace(/\\/g, '/'),
     f: 0,
