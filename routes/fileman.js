@@ -16,11 +16,14 @@ function accessControl(req, res, p) {
   let committees = req.session.user.committees;
   let commiteePath = '';
   let response = false;
-
-  for (committeeID in committees) {
-    commiteePath = path.join(filesRoot, committeeID);
-    if (p.startsWith(commiteePath)) {
-      response = true;
+  if (isAdmin(req.session)) {
+    response = true;
+  } else {
+    for (committeeID in committees) {
+      commiteePath = path.join(filesRoot, committeeID);
+      if (p.startsWith(commiteePath)) {
+        response = true;
+      }
     }
   }
   if (!response) {
