@@ -32,13 +32,6 @@ function isAdmin(session) {
   let email = session.user.email;
   let committees = session.user.committees;
 
-  console.log({
-    email: email,
-    committees: committees,
-    admins: config.ADMINS,
-    admin_committees: config.ADMIN_COMMITTEES
-  });
-
   if (config.ADMINS.indexOf(email) != -1) {
     return true;
   }

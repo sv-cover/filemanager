@@ -9,7 +9,6 @@ const coverapi = function (req, res, next) {
             req.session = repos;
             next();
         }).catch(function(err) {
-            console.log(err);
             res.status(403).send('Something went wrong with the CoverAPI');
         });
     } else {
