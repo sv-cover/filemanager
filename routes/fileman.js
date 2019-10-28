@@ -28,6 +28,29 @@ function accessControl(req, res, p) {
   }
 }
 
+function isAdmin(session) {
+  let email = session.user.email;
+  let committees = session.user.committees;
+
+  console.log({
+    email: email,
+    committees: committees,
+    admins: config.ADMINS,
+    admin_committees: config.ADMIN_COMMITTEES
+  });
+
+  if (config.ADMINS.indexOf(email) != -1) {
+    return true;
+  }
+  for (let committee in committees) {
+    if (config.ADMIN_COMMITTEES.indexOf(committee) != -1) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 router.use('/', function(req, res, next) {
   if (typeof req.session == undefined || req.session == null || Array.isArray(req.session.user.committees) || req.session.user.committees.length > 0) {
     res.status(403).send('You are not allowed to access Cover Fileman');
@@ -58,11 +81,15 @@ router.post('/dirlist', function(req, res) {
   let filesRoot = config.UPLOADS_FOLDER;
   let committees = req.session.user.committees;
 
-  for (committeeID in committees) {
-    let responseTemp = [];
-    
-    getDirectories(path.join(filesRoot, committeeID), responseTemp);
-    response = response.concat(responseTemp);
+  if (isAdmin(req.session)) {
+    getDirectories(filesRoot, response);
+  } else {
+    for (committeeID in committees) {
+      let responseTemp = [];
+      
+      getDirectories(path.join(filesRoot, committeeID), responseTemp);
+      response = response.concat(responseTemp);
+    }
   }
 
   res.send(response);
