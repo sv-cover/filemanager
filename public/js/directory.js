@@ -329,14 +329,15 @@ function Directory(fullPath, numDirs, numFiles){
       alert(t('E_ActionDisabled'));
       return;
     }
+    var newFullPath = RoxyUtils.MakePath(newPath, this.name);
     var url = RoxyUtils.AddParam(RoxyFilemanConf.COPYDIR, 'd', this.fullPath);
-    url = RoxyUtils.AddParam(url, 'n', newPath);
+    url = RoxyUtils.AddParam(url, 'n', newFullPath);
     var item = this;
     var ret = false;
     $.ajax({
         url: url,
         type: 'POST',
-        data: {d: this.fullPath, n: newPath},
+        data: {d: this.fullPath, n: newFullPath},
         dataType: 'json',
         async:false,
         cache: false,

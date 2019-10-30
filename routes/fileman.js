@@ -67,37 +67,35 @@ router.post('/fileslist', function(req, res) {
 router.post('/copy', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   utils.fileFolderAccessControl(res, req.session, req.body.n);
-  const basename = path.basename(req.body.f || req.body.d);
-  try {
-    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n, basename));
+  fs.copy(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    console.log(err);
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    res.status(500).send({ res:"error", msg: err.toString() });
+  });
 });
 
 /* Create directory */
 router.post('/createdir', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.d);
   utils.fileFolderAccessControl(res, req.session, req.body.n);
-  try {
-    fs.mkdirsSync(path.join(serverRoot, req.body.d, req.body.n));
+  fs.mkdir(path.join(serverRoot, req.body.d, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    res.status(500).send({ res:"error", msg: err.toString() });
+  });
 });
 
 /* Delete a file or directory */
 router.post('/delete', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
-  try {
-    fs.removeSync(path.join(serverRoot, req.body.f || req.body.d));
+  fs.remove(path.join(serverRoot, req.body.f || req.body.d))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    res.status(500).send({ res:"error", msg: err.toString() });
+  });
 });
 
 /* Download file */
@@ -124,14 +122,11 @@ router.get('/downloaddir', function(req, res) {
 router.post('/move', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   utils.fileFolderAccessControl(res, req.session, req.body.n);
-  fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n), function (err) {
-    if (err) {
-      console.log(err);
-      res.send({ res:"error", msg: err.toString() });
-    }
-    else{
-      res.send({ res: "ok", msg: "Success" });
-    }
+  fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
+  .then(function() {
+    res.send({ res: "ok", msg: "Success" });
+  }).catch(function(err) {
+    res.status(500).send({ res:"error", msg: err.toString() });
   });
 });
 
@@ -139,12 +134,12 @@ router.post('/move', function(req, res) {
 router.post('/rename', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   var pathDir = path.dirname(req.body.f || req.body.d);
-  try {
-    fs.renameSync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n));
+  fs.rename(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    res.send({ res:"error", msg: err.toString() });
+  })
 });
 
 /* Upload files */
@@ -157,12 +152,21 @@ var storage = multer.diskStorage({
   }
 });
 
-var upload = multer({ storage: storage }).array('files[]');
+function fileFilter(req, file, cb) {
+  const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
+  if (config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
+    cb(new Error('File extension on not allowed uploads list.'));
+  } else if (config.FORBIDDEN_UPLOADS !== undefined && config.FORBIDDEN_UPLOADS !== '' && config.FORBIDDEN_UPLOADS.includes(fileType)) {
+    cb(new Error('File extension on forbidden uploads list.'));
+  }
+  cb(null, true);
+}
+
+var upload = multer({ storage: storage, fileFilter: fileFilter }).array('files[]');
 router.post('/upload', function(req, res) {
-  console.log(req);
   upload(req, res, function (err) {
     if (err) {
-      res.send({ res:"error", msg: err });
+      res.send({ res:"error", msg: err.toString() });
     }
     else{
       res.send({ res: "ok", msg: "Success" });  
