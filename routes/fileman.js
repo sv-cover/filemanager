@@ -12,7 +12,7 @@ const utils = require('./utils');
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
 router.use('/', function(req, res, next) {
-  if (typeof req.session == undefined || req.session == null || Array.isArray(req.session.user.committees) || req.session.user.committees.length > 0) {
+  if (req.session === undefined || req.session === null || Array.isArray(req.session.user.committees) || req.session.user.committees.length == 0) {
     res.status(403).send('You are not allowed to access Cover Fileman');
   } else {
     next()
@@ -156,22 +156,6 @@ router.route('/generatethumb').get(utils.hasGraphicsMagick).get(function(req, re
   .crop(req.query.width || '200', req.query.height || '200')
   .stream('png')
   .pipe(res);
-});
-
-/* Generate resized image */
-router.route('/resize').get(utils.hasGraphicsMagick).get(function(req, res) {
-  const query = req.query;
-  let image = gm(path.join(serverRoot, query.f));
-  if (typeof query.w != undefined) {
-    if (typeof query.a != undefined) {
-      image = image.resize(query.w, query.h || null, query.a);
-    } else {
-      image = image.resize(query.w, query.h || null);
-    }
-    image.stream().pipe(res);
-  } else {
-    res.status(400).send('Missing the width parameter')
-  }
 });
 
 /* Upload files */
