@@ -19,7 +19,6 @@ cons.requires.nunjucks = nunjucks.configure('views', {
 const routes = require('./routes/index');
 const conf = require('./routes/conf');
 const fileman = require('./routes/fileman');
-const api = require('./routes/api');
 
 // view engine setup
 app.engine('html', cons.nunjucks);
@@ -32,7 +31,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
 
 // checks if the user is logged in to cover
 app.use('/', coverapi);
@@ -40,7 +39,6 @@ app.use('/', coverapi);
 app.use('/', routes);
 app.use('/conf.json', conf);
 app.use('/fileman', fileman);
-app.use('/api', api);
 
 // development error handler
 // will print stacktrace

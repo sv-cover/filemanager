@@ -7,7 +7,10 @@ config = {
     'COVER_API_APP': 'test-app',
     'COVER_API_SECRET': 'ultrasecrethashkey',
     /* General */
-    'UPLOADS_FOLDER': 'uploads'
+    'SERVER_ROOT': 'public',
+    'UPLOADS_FOLDER': 'uploads',
+    'ADMINS': ['nico@svcover.nl'],
+    'ADMIN_COMMITTEES': ['board']
 }
 
 module.exports = config
