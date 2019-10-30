@@ -16,9 +16,10 @@ cons.requires.nunjucks = nunjucks.configure('views', {
   express   : app
 });
 
-var routes = require('./routes/index');
-var conf = require('./routes/conf');
-var fileman = require('./routes/fileman');
+const routes = require('./routes/index');
+const conf = require('./routes/conf');
+const fileman = require('./routes/fileman');
+const api = require('./routes/api');
 
 // view engine setup
 app.engine('html', cons.nunjucks);
@@ -39,6 +40,7 @@ app.use('/', coverapi);
 app.use('/', routes);
 app.use('/conf.json', conf);
 app.use('/fileman', fileman);
+app.use('/api', api);
 
 // development error handler
 // will print stacktrace

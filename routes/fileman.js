@@ -4,65 +4,17 @@ var fs = require('fs-extra');
 var path = require('path');
 var sizeOf = require('image-size');
 var gm = require('gm');
-var exec = require('child_process').exec;
 var multer  = require('multer');
 var archiver = require('archiver');
 const config = require('../config');
+const utils = require('./utils');
 
-var serverRoot = './public/';
-
-function accessControl(req, res, p) {
-  let filesRoot = config.UPLOADS_FOLDER;
-  let committees = req.session.user.committees;
-  let commiteePath = '';
-  let response = false;
-  if (isAdmin(req.session)) {
-    response = true;
-  } else {
-    for (committeeID in committees) {
-      commiteePath = path.join(filesRoot, committeeID);
-      if (p.startsWith(commiteePath)) {
-        response = true;
-      }
-    }
-  }
-  if (!response) {
-    res.status(403).send('You are not allowed to access this file/folder.');
-  }
-}
-
-function isAdmin(session) {
-  let email = session.user.email;
-  let committees = session.user.committees;
-
-  if (config.ADMINS.indexOf(email) != -1) {
-    return true;
-  }
-  for (let committee in committees) {
-    if (config.ADMIN_COMMITTEES.indexOf(committee) != -1) {
-      return true;
-    }
-  }
-
-  return false;
-}
+const serverRoot = path.join('.', config.SERVER_ROOT);
 
 router.use('/', function(req, res, next) {
   if (typeof req.session == undefined || req.session == null || Array.isArray(req.session.user.committees) || req.session.user.committees.length > 0) {
     res.status(403).send('You are not allowed to access Cover Fileman');
   } else {
-    if (req.body.f != undefined) {
-      accessControl(req, res, req.body.f);
-    }
-    if (req.body.d != undefined) {
-      accessControl(req, res, req.body.d);
-    }
-    if (req.query.f != undefined) {
-      accessControl(req, res, req.query.f);
-    }
-    if (req.query.d != undefined) {
-      accessControl(req, res, req.query.d);
-    }
     next()
   }
 });
@@ -77,7 +29,7 @@ router.post('/dirlist', function(req, res) {
   let filesRoot = config.UPLOADS_FOLDER;
   let committees = req.session.user.committees;
 
-  if (isAdmin(req.session)) {
+  if (utils.isAdmin(req.session)) {
     getDirectories(filesRoot, response);
   } else {
     for (committeeID in committees) {
@@ -93,8 +45,9 @@ router.post('/dirlist', function(req, res) {
 
 /* List files in a directory */
 router.post('/fileslist', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.d);
   var response = [];
-  var pathDir = serverRoot + req.body.d;
+  var pathDir = path.join(serverRoot, req.body.d);
 
   fs.readdirSync(pathDir).map(function(file) {
     var fileDir = path.join(pathDir, file);
@@ -117,16 +70,19 @@ router.post('/fileslist', function(req, res) {
 
 /* Copying a file or directory */
 router.post('/copy', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   try {
-    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n));
+    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n, 'test.png'));
     res.send({ res: "ok", msg: "Success" });
   } catch (err) {
+    console.log(err);
     res.send({ res:"error", msg: err });
   }
 });
 
 /* Create directory */
 router.post('/createdir', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.d);
   try {
     fs.mkdirsSync(path.join(serverRoot, req.body.d, req.body.n));
     res.send({ res: "ok", msg: "Success" });
@@ -137,6 +93,7 @@ router.post('/createdir', function(req, res) {
 
 /* Delete a file or directory */
 router.post('/delete', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   try {
     fs.removeSync(path.join(serverRoot, req.body.f || req.body.d));
     res.send({ res: "ok", msg: "Success" });
@@ -147,11 +104,13 @@ router.post('/delete', function(req, res) {
 
 /* Download file */
 router.get('/download', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.query.f);
   res.download(path.join(serverRoot, req.query.f));
 });
 
 /* Download directory */
 router.get('/downloaddir', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.query.d);
   res.setHeader('Content-disposition', 'attachment; filename=' + path.basename(req.query.d) + '.zip');
   
   var archive = archiver('zip');
@@ -164,6 +123,7 @@ router.get('/downloaddir', function(req, res) {
 
 /* Move a file or directory */
 router.post('/move', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n), function (err) {
     if (err) {
         res.send({ res:"error", msg: err });
@@ -176,6 +136,7 @@ router.post('/move', function(req, res) {
 
 /* Rename a file or directory */
 router.post('/rename', function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
   var pathDir = path.dirname(req.body.f || req.body.d);
   try {
     fs.renameSync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n));
@@ -186,22 +147,16 @@ router.post('/rename', function(req, res) {
 });
 
 /* Generate thumbnail */
-router.get('/generatethumb', function(req, res) {
-  exec("gm -help", function (err) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({ error: 'GraphicsMagick is not installed' })
-    } else {
-      res.setHeader("content-type", "image/png");
-  
-      gm(path.join(serverRoot, req.query.f))
-      .resize(req.query.width || '200', req.query.height || '200', '^')
-      .gravity('Center')
-      .crop(req.query.width || '200', req.query.height || '200')
-      .stream('png')
-      .pipe(res);  
-    }
-  });
+router.route('/generatethumb').get(utils.hasGraphicsMagick).get(function(req, res) {
+  utils.fileFolderAccessControl(res, req.session, req.query.f);
+  res.setHeader("content-type", "image/png");
+
+  gm(path.join(serverRoot, req.query.f))
+  .resize(req.query.width || '200', req.query.height || '200', '^')
+  .gravity('Center')
+  .crop(req.query.width || '200', req.query.height || '200')
+  .stream('png')
+  .pipe(res);
 });
 
 /* Upload files */
@@ -216,6 +171,7 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage }).array('files[]');
 router.post('/upload', function(req, res) {
+  console.log(req);
   upload(req, res, function (err) {
     if (err) {
       res.send({ res:"error", msg: err });
@@ -234,9 +190,9 @@ var getDirectories = function(srcpath, response) {
   };
   response.push(info);
   
-  fs.readdirSync(serverRoot + srcpath).map(function(file) {
+  fs.readdirSync(path.join(serverRoot, srcpath)).map(function(file) {
     var pathDir = path.join(srcpath, file);
-    if(fs.statSync(serverRoot + pathDir).isDirectory()){
+    if(fs.statSync(path.join(serverRoot, pathDir)).isDirectory()){
         info.d++;
         getDirectories(pathDir, response);
     }else{
