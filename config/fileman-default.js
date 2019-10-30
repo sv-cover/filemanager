@@ -1,11 +1,9 @@
-const frontend = {
+const fileman = {
     "RETURN_URL_PREFIX":   "",
     "THUMBS_VIEW_WIDTH":   "140",
     "THUMBS_VIEW_HEIGHT":  "120",
     "PREVIEW_THUMB_WIDTH": "300",
     "PREVIEW_THUMB_HEIGHT":"200",
-    "MAX_IMAGE_WIDTH":     "1000", /*TODO: Needs to be implemented*/
-    "MAX_IMAGE_HEIGHT":    "1000", /*TODO: Needs to be implemented*/
     "INTEGRATION":         "",
     "DIRLIST":             "/fileman/dirlist",
     "CREATEDIR":           "/fileman/createdir",
@@ -31,4 +29,4 @@ const frontend = {
     "OPEN_LAST_DIR":       "yes"
 }
 
-module.exports = frontend
+module.exports = fileman;

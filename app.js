@@ -8,6 +8,7 @@ var cons = require('consolidate');
 var nunjucks = require('nunjucks');
 var app = express();
 var coverapi = require('./coverapi');
+const config = require('./config');
 
 // add nunjucks to requires so filters can be
 // added and the same instance will be used inside the render method
