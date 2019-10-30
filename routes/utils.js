@@ -1,5 +1,7 @@
 const path = require('path');
 const exec = require('child_process').exec;
+const config = require('../config');
+
 const utils = {};
 
 utils.hasGraphicsMagick = function(req, res, next) {

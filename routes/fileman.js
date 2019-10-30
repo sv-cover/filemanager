@@ -3,7 +3,6 @@ var router = express.Router();
 var fs = require('fs-extra');
 var path = require('path');
 var sizeOf = require('image-size');
-var gm = require('gm');
 var multer  = require('multer');
 var archiver = require('archiver');
 const config = require('../config');
@@ -13,14 +12,10 @@ const serverRoot = path.join('.', config.SERVER_ROOT);
 
 router.use('/', function(req, res, next) {
   if (req.session === undefined || req.session === null || Array.isArray(req.session.user.committees) || req.session.user.committees.length == 0) {
-    res.status(403).send('You are not allowed to access Cover Fileman');
+    res.status(403).send('You are not allowed to access to the Cover Fileman API');
   } else {
     next()
   }
-});
-
-router.get('/', function(req, res, next) {
-  res.render('fileman', { title: 'Cover File Manager' });
 });
 
 /* List directory tree */
@@ -71,8 +66,10 @@ router.post('/fileslist', function(req, res) {
 /* Copying a file or directory */
 router.post('/copy', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, req.session, req.body.n);
+  const basename = path.basename(req.body.f || req.body.d);
   try {
-    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n, 'test.png'));
+    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n, basename));
     res.send({ res: "ok", msg: "Success" });
   } catch (err) {
     console.log(err);
@@ -83,6 +80,7 @@ router.post('/copy', function(req, res) {
 /* Create directory */
 router.post('/createdir', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.d);
+  utils.fileFolderAccessControl(res, req.session, req.body.n);
   try {
     fs.mkdirsSync(path.join(serverRoot, req.body.d, req.body.n));
     res.send({ res: "ok", msg: "Success" });
@@ -115,21 +113,24 @@ router.get('/downloaddir', function(req, res) {
   
   var archive = archiver('zip');
   archive.pipe(res);
-  archive.bulk([
-    { expand: true, cwd: path.join(serverRoot, req.query.d), src: ['**/*'] }
-  ]);
+  archive.glob('**/*', {
+    expand: true,
+    cwd: path.join(serverRoot, req.query.d)
+  });
   archive.finalize();
 });
 
 /* Move a file or directory */
 router.post('/move', function(req, res) {
   utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, req.session, req.body.n);
   fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n), function (err) {
     if (err) {
-        res.send({ res:"error", msg: err });
+      console.log(err);
+      res.send({ res:"error", msg: err.toString() });
     }
     else{
-        res.send({ res: "ok", msg: "Success" });
+      res.send({ res: "ok", msg: "Success" });
     }
   });
 });
@@ -144,18 +145,6 @@ router.post('/rename', function(req, res) {
   } catch (err) {
     res.send({ res:"error", msg: err });
   }
-});
-
-/* Generate thumbnail */
-router.route('/generatethumb').get(utils.hasGraphicsMagick).get(function(req, res) {
-  res.setHeader("content-type", "image/png");
-
-  gm(path.join(serverRoot, req.query.f))
-  .resize(req.query.width || '200', req.query.height || '200', '^')
-  .gravity('Center')
-  .crop(req.query.width || '200', req.query.height || '200')
-  .stream('png')
-  .pipe(res);
 });
 
 /* Upload files */

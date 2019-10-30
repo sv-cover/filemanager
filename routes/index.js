@@ -23,4 +23,12 @@ router.get('/', function(req, res, next) {
   }
 });
 
+router.get('/fileman', function(req, res, next) {
+  if (req.session === undefined || req.session === null || Array.isArray(req.session.user.committees) || req.session.user.committees.length == 0) {
+    res.status(403).send('You are not a member of a committee therefore you have no access Cover Fileman');
+  } else {
+    res.render('fileman', { title: 'Cover File Manager' });
+  }
+});
+
 module.exports = router;
