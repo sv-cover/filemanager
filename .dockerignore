@@ -3,10 +3,17 @@ node_modules
 
 # ide
 .vscode
+.devcontainer
 
 # git
+.git
 .gitignore
+README.md
 
 # uploads
 public/uploads/*
 !public/uploads/cover_logo.png
+
+#test scripts
+*.ps1
+*.sh
