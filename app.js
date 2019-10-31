@@ -1,3 +1,4 @@
+const exec = require('child_process').exec;
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -9,6 +10,20 @@ var nunjucks = require('nunjucks');
 var app = express();
 var coverapi = require('./coverapi');
 const config = require('./config');
+
+hasGraphicsMagick = function() {
+  exec("gm -help", function (err) {
+    if (err) {
+      console.log(err);
+      app.locals.hasGM = false;
+    } else {
+      app.locals.hasGM = true;
+    }
+  });
+};
+
+// Check if GraphicsMagick is installed.
+hasGraphicsMagick();
 
 // add nunjucks to requires so filters can be
 // added and the same instance will be used inside the render method
@@ -35,13 +50,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
 
+// Image manipulation api
+app.use('/images', images);
+
 // checks if the user is logged in to cover
 app.use('/', coverapi);
 
 app.use('/', routes);
 app.use('/conf.json', conf);
 app.use('/fileman', fileman);
-app.use('/images', images);
 
 // development error handler
 // will print stacktrace

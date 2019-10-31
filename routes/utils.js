@@ -1,19 +1,7 @@
 const path = require('path');
-const exec = require('child_process').exec;
 const config = require('../config');
 
 const utils = {};
-
-utils.hasGraphicsMagick = function(req, res, next) {
-  exec("gm -help", function (err) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({ error: 'GraphicsMagick is not installed' })
-    } else {
-      next();
-    }
-  });
-};
 
 utils.isAdmin = function(session) {
   let email = session.user.email;

@@ -7,7 +7,13 @@ const utils = require('./utils');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
-router.use('/', utils.hasGraphicsMagick);
+router.use('/', function(req, res, next) {
+  if (!req.app.locals.hasGM) {
+    res.status(500).send('Graphics Magic is not installed.');
+  } else {
+    next();
+  }
+});
 
 /* 
 Generate resized image by adding ?f=path/to/file&w=width[&h=heigth&o=GraphicsMagickOption]
@@ -15,8 +21,10 @@ For the possible option for GraphicsMagickOption see http://www.graphicsmagick.o
 */
 router.get('/resize', function(req, res) {
   const query = req.query;
+  
   if (query.f !== undefined && query.w !== undefined) {
     res.setHeader("content-type", "image/png");
+
     let image = gm(path.join(serverRoot, query.f));
     if (query.o !== undefined) {
       image = image.resize(query.w, query.h || null, query.o);
