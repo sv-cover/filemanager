@@ -189,6 +189,7 @@ router.post('/rename', function(req, res) {
 router.get('/generatethumb', function(req, res) {
   exec("gm -help", function (err) {
     if (err) {
+      console.log(err);
       res.status(500).send({ error: 'GraphicsMagick is not installed' })
     } else {
       res.setHeader("content-type", "image/png");

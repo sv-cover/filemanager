@@ -4,3 +4,8 @@ npm-debug.log
 
 #Code editors
 .vscode
+.devcontainer
+
+#test scripts
+*.ps1
+*.sh

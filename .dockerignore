@@ -1,0 +1,12 @@
+# Dependency directory
+node_modules
+
+# ide
+.vscode
+
+# git
+.gitignore
+
+# uploads
+public/uploads/*
+!public/uploads/cover_logo.png
