@@ -11,6 +11,7 @@
     "consolidate": "^0.15.1",
     "cookie-parser": "~1.4.3",
     "debug": "^4.1.1",
+    "dev-null": "^0.1.1",
     "express": "^4.13.4",
     "fs-extra": "^8.1.0",
     "gm": "^1.23.0",
@@ -21,7 +22,8 @@
     "path": "^0.12.7",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "streaming-cache": "^0.5.5"
   },
   "devDependencies": {
     "eslint": "^6.6.0",
