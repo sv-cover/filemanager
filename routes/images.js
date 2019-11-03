@@ -33,7 +33,7 @@ router.get('/resize', function(req, res) {
       utils.imageSend(res, image);
     }).catch((err) => {
       console.dir(err);
-      res.status(400).send(err).end();
+      res.status(400).send('Failed to open file or file is not an image.').end();
     });
   } else {
     res.status(400).send('Missing query arguments.').end();
@@ -53,7 +53,7 @@ router.get('/generatethumb', function(req, res) {
       utils.imageSend(res, image);
     }).catch((err) => {
       console.dir(err);
-      res.status(400).send(err).end();
+      res.status(400).send('Failed to open file or file is not an image.').end();
     });
   } else {
     res.status(400).send('Missing query arguments.').end();

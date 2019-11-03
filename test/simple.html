@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Test</title>
+    <style>
+      iframe {border: medium groove;}
+    </style>
+</head>
+<body>
+  <div>
+    <input type="text" id="testFile" name="testFile" placeholder="Path to selected file will be displayed here" disabled>
+  </div>
+  <div>
+    <iframe id="testIframe" src="http://localhost:3000/fileman" frameborder="0" height=600 width=800></iframe>
+  <div>
+
+  <script type="text/javascript">
+    const textInput = document.querySelector('#testFile');
+    window.addEventListener("message", event => {
+      console.log(event);
+      if (event.origin === "http://localhost:3000") {
+        const file = JSON.parse(event.data);
+        console.log(file);
+        textInput.value = file.fullPath;
+      }
+    }, false);
+  </script>
+</body>
+</html>

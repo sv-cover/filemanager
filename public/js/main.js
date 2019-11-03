@@ -668,7 +668,7 @@ function removeDisabledActions(){
   }
 }
 function getPreselectedFile(){
-  var filePath = RoxyUtils.GetUrlParam('selected');
+  var filePath = decodeURIComponent(RoxyUtils.GetUrlParam('selected'));
   if(!filePath){
     switch(getFilemanIntegration()){
       case 'ckeditor':

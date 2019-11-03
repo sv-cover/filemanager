@@ -58,7 +58,7 @@ utils.imageOpen = function(p) {
       let image = gm(p);
       image.identify(function(err, value) {
         if (err) {
-          reject('File is not an supported image or does not exist.');
+          reject(err);
         } else {
           resolve(image);
         }
