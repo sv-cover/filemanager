@@ -1,6 +1,6 @@
 let config = require('./fileman');
 
-config = {
+const config = {...{
     /* Cover API */
     'COVER_API_URL': 'http://host.docker.internal:8080/api.php',
     'COVER_LOGIN_URL': 'http://localhost:8080/api.php?view=login',
@@ -14,12 +14,12 @@ config = {
     'ADMINS': ['nico@svcover.nl'],
     'ADMIN_COMMITTEES': ['board'],
     /* Images */
-    'MAX_IMAGE_WIDTH':     '2000', /*TODO: Needs to be implemented*/
-    'MAX_IMAGE_HEIGHT':    '2000', /*TODO: Needs to be implemented*/
+    "MAX_IMAGE_WIDTH": "2000", /*TODO: Needs to be implemented*/
+    "MAX_IMAGE_HEIGHT": "2000", /*TODO: Needs to be implemented*/
     /* Caching */
     'CACHE_USE': true,
-    'MAX_CACHE_SIZE': 100*1024*1024, /* In bytes. */
-    'MAX_CACHE_AGE': 24*60*60*1000 /* In miliseconds */
-}
+    'CACHE_MAX_SIZE': 100*1024*1024, /* In bytes. */
+    'CACHE_MAX_AGE': 24*60*60*1000 /* In miliseconds */
+}, ...fileman}
 
-module.exports = config
+module.exports = config;
