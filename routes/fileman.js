@@ -142,6 +142,25 @@ router.post('/rename', function(req, res) {
   })
 });
 
+/* Generate thumbnail */
+router.get('/generatethumb', function(req, res) {
+  const query = req.query;
+  if (query.f !== undefined) {
+    const p = path.join(serverRoot, query.f)
+    utils.imageOpen(p).then((image) => {
+      image = image
+        .resize(query.width || '200', query.height || '200', '^')
+        .gravity('Center')
+        .crop(query.width || '200', query.height || '200');
+      utils.imageSend(res, image);
+    }).catch((err) => {
+      res.status(400).send(err).end();
+    });
+  } else {
+    res.status(400).send('Missing query arguments.').end();
+  }
+});
+
 /* Upload files */
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {

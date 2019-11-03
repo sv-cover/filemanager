@@ -1,4 +1,6 @@
+const fs = require('fs-extra');
 const path = require('path');
+const gm = require('gm');
 const config = require('../config');
 
 const utils = {};
@@ -36,8 +38,40 @@ utils.fileFolderAccessControl = function(res, session, p) {
     }
   }
   if (!response) {
-    res.status(403).send('You are not allowed to access this file/folder.');
+    res.status(403).send('You are not allowed to access this file/folder.').end();
   }
+};
+
+utils.checkIfFileExists = function(res, f) {
+  fs.access(f, fs.constants.F_OK)
+  .then(function() { return })
+  .catch(function(err) {
+    console.log('File does not exist: ' + f);
+    res.status(404).send('File does not exist.').end();
+  });
+};
+
+utils.imageOpen = function(p) {
+  console.log(p);
+  return new Promise((resolve, reject) => {
+    try {
+      let image = gm(p);
+      image.identify(function(err, value) {
+        if (err) {
+          reject('File is not an supported image or does not exist.');
+        } else {
+          resolve(image);
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+utils.imageSend = function(res, image) {
+  res.setHeader("content-type", "image/png");
+  image.stream('png').pipe(res);
 };
 
 module.exports = utils;

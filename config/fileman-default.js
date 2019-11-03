@@ -19,7 +19,7 @@ const fileman = {
     "MOVEFILE":            "/fileman/move",
     "COPYFILE":            "/fileman/copy",
     "RENAMEFILE":          "/fileman/rename",
-    "GENERATETHUMB":       "/images/generatethumb",
+    "GENERATETHUMB":       "/fileman/generatethumb",
     "RESIZEIMAGE":         "/images/resize",
     "DEFAULTVIEW":         "list",
     "FORBIDDEN_UPLOADS":   "zip js jsp jsb mhtml mht xhtml xht php phtml php3 php4 php5 phps shtml jhtml pl sh py cgi exe application gadget hta cpl msc jar vb jse ws wsf wsc wsh ps1 ps2 psc1 psc2 msh msh1 msh2 inf reg scf msp scr dll msi vbs bat com pif cmd vxd cpl htpasswd htaccess",
