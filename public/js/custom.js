@@ -33,15 +33,7 @@ function FileSelected(file){
    * height - if the file is image, this will be the height of the original image, 0 otherwise
    * 
    */
-
-  
-  window.parent.postMessage(JSON.stringify({
-    fullPath: file.fullPath,
-    path: file.path,
-    name: file.name,
-    ext: file.ext,
-    encodedPath: encodeURIComponent(file.fullPath)
-  }), '*');
+  window.parent.postMessage(JSON.stringify(file), '*');
 }
 
 function GetSelectedValue(){

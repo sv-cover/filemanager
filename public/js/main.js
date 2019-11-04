@@ -354,8 +354,9 @@ function renameFile(){
 }
 function getSelectedFile(){
   var ret = null;
-  if($('#pnlFileList .selected').length > 0)
-    ret = new File($('#pnlFileList .selected').attr('data-path'));
+  var selected = $('#pnlFileList .selected');
+  if(selected.length > 0)
+    ret = new File(selected.attr('data-path'), selected.attr('data-size'), selected.attr('data-time'), selected.attr('data-w'), selected.attr('data-h'));
   return ret;
 }
 function getSelectedDir(){
@@ -739,59 +740,68 @@ function initSelection(filePath){
   if(!hasSelection)
     selectFirst();
 }
+function removeSelect() {
+  var select = RoxyUtils.GetUrlParam('select');
+  if (select && select === 'false') {
+    $('#mnuSelectFile').next().remove();
+    $('#mnuSelectFile').remove();
+    $('#btnSelectFile').remove();
+  }
+}
 $(function(){
   RoxyUtils.LoadConfig();
-  var d = new Directory();
-  d.LoadAll();
-  $('#wraper').show();
-  
-  window.setTimeout('initSelection()', 100);
-
-  RoxyUtils.Translate();
-  $('body').click(function(){
-    closeMenus();
-  });
-  
-  var viewType = RoxyUtils.GetCookie('roxyview');
-  if(!viewType)
-    viewType = RoxyFilemanConf.DEFAULTVIEW;
-  if(viewType)
-    switchView(viewType);
+    var d = new Directory();
+    d.LoadAll();
+    $('#wraper').show();
     
-  ResizeLists();
-  $(".actions input").tooltip({track: true});
-  $( window ).resize(ResizeLists);
+    window.setTimeout('initSelection()', 100);
   
-  document.oncontextmenu = function() {return false;};
-  removeDisabledActions();
-  $('#copyYear').html(new Date().getFullYear());
-  if(RoxyFilemanConf.UPLOAD && RoxyFilemanConf.UPLOAD != ''){
-    var dropZone = document.getElementById('fileActions');
-    dropZone.ondragover = function () { return false; };
-    dropZone.ondragend = function () { return false; };
-    dropZone.ondrop = function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropFiles(e);
-    };
+    RoxyUtils.Translate();
+    $('body').click(function(){
+      closeMenus();
+    });
     
-    dropZone = document.getElementById('dlgAddFile');
-    dropZone.ondragover = function () { return false; };
-    dropZone.ondragend = function () { return false; };
-    dropZone.ondrop = function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropFiles(e, true);
-    };
-  }
-  
-  if(getFilemanIntegration() == 'tinymce3'){
-    try {
-      $('body').append('<script src="js/tiny_mce_popup.js"><\/script>');
+    var viewType = RoxyUtils.GetCookie('roxyview');
+    if(!viewType)
+      viewType = RoxyFilemanConf.DEFAULTVIEW;
+    if(viewType)
+      switchView(viewType);
+      
+    ResizeLists();
+    $(".actions input").tooltip({track: true});
+    $( window ).resize(ResizeLists);
+    
+    document.oncontextmenu = function() {return false;};
+    removeDisabledActions();
+    removeSelect();
+    $('#copyYear').html(new Date().getFullYear());
+    if(RoxyFilemanConf.UPLOAD && RoxyFilemanConf.UPLOAD != ''){
+      var dropZone = document.getElementById('fileActions');
+      dropZone.ondragover = function () { return false; };
+      dropZone.ondragend = function () { return false; };
+      dropZone.ondrop = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropFiles(e);
+      };
+      
+      dropZone = document.getElementById('dlgAddFile');
+      dropZone.ondragover = function () { return false; };
+      dropZone.ondragend = function () { return false; };
+      dropZone.ondrop = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropFiles(e, true);
+      };
     }
-    catch(ex){}
-  }
-});
+    
+    if(getFilemanIntegration() == 'tinymce3'){
+      try {
+        $('body').append('<script src="js/tiny_mce_popup.js"><\/script>');
+      }
+      catch(ex){}
+    }
+  });
 function getFilemanIntegration(){
   var integration = RoxyUtils.GetUrlParam('integration');
   if(!integration)
