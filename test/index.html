@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      /* The Modal (background) */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content */
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+      }
+      
+      .modal iframe {
+        width: 100%;
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      input {width: 600px}
+    </style>
+    <script type="text/javascript" src="fileman.js"></script>
+</head>
+<body>
+  <div>
+    <div>
+      <input type="text" id="testText" name="testText" placeholder="Path to selected file will be displayed here">
+    </div>
+    <div>
+      <input type="button" id="testButton" name="testButton" placeholder="Path to selected file will be displayed here">
+    </div>
+  <div>
+  <div>
+    <img id="testImg" src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Click on the image to change it">
+  </div>
+  <div>
+    <img id="testImgOptions" src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Click on the image to change it">
+  </div>
+  <div>
+    <picture id="testPicture">
+      <img src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Test pictures" style="width:auto;">
+    </picture>
+  </div>
+
+  <!-- The Modal -->
+  <div id="iframe" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <iframe src="http://localhost:3000/fileman" frameborder="0" height=600 width=800></iframe>
+    </div>
+
+  </div>
+
+  <script type="text/javascript">
+    var fileman = new Fileman('http://localhost:3000');
+    var iframe = document.getElementById('iframe');
+
+    function showModal() {
+      iframe.style.display = "block";
+    }
+
+    function closeModal() {
+      iframe.style.display = "none";
+    }
+
+    fileman.connectInputOnClick(showModal, closeModal, '#testText');
+    fileman.connectInputOnClick(showModal, closeModal, '#testButton');
+    fileman.connectImgOnClick(showModal, closeModal, '#testImg');
+    fileman.connectImgOnClick(showModal, closeModal, '#testImgOptions', {w: 200, h: 200});
+    fileman.connectPictures(showModal, closeModal, '#testPicture', [1000, 600, 400]);
+  </script>
+</body>
+</html>

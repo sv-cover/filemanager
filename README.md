@@ -1,4 +1,4 @@
-# filemanager
+# Cover Fileman
 
 A rework of Roxy Filemanager for Cover
 The original source code can be found at **[Roxy Fileman](http://www.roxyfileman.com)**.
@@ -13,6 +13,9 @@ script in the main folder of the project, and then run:
 php -S  127.0.0.1:8080
 ```
 Now you can log in to your local server using the login details in the coverapi tester script!
+
+# Intergration Tests
+When you have the app running you can test and see examples on how to intergrate the app into an website in test.
 
 # Docker instructions
 To test the container locally:
