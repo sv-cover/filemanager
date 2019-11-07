@@ -18,8 +18,8 @@ RUN npm install
 #-e "NODE_ENV=production"
 
 # Bundle app source
-VOLUME "/usr/src/app/public/uploads"
 COPY . .
+VOLUME "/usr/src/app/public/uploads"
 
 EXPOSE 3000
 CMD [ "node", "./bin/www" ]

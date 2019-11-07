@@ -52,7 +52,6 @@ utils.checkIfFileExists = function(res, f) {
 };
 
 utils.imageOpen = function(p) {
-  console.log(p);
   return new Promise((resolve, reject) => {
     try {
       let image = gm(p);
