@@ -53,6 +53,7 @@ app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
 
 // Set locals
 app.locals.title = 'Fileman';
+app.locals.config = config;
 
 // Image manipulation api
 app.use('/images', images);

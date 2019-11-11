@@ -12,20 +12,40 @@ const utils = require('./utils');
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
 router.use('/', function(req, res, next) {
-  if (res.locals.session === undefined || res.locals.session === null || Array.isArray(res.locals.session.user.committees) || res.locals.session.user.committees.length == 0) {
-    res.status(403).send('You are not allowed to access to the Cover Fileman API');
+  if (utils.isCommitteeMember(req.session)) {
+    next();
   } else {
-    next()
+    res.status(403).send('You are not allowed to access to the Cover Fileman API');
   }
 });
+
+function fDAccessControl(req, res, next) {
+  console.log('Access control for: ', req.query.f || req.query.d)
+  if (!(req.query.f && req.query.d) && utils.fileFolderAccess(req.session, req.query.f || req.query.d) ) {
+    next();
+  } else {
+    res.status(403).send('You are not allowed access to this file or folder');
+  }
+}
+
+function nAccessControl(req, res, next) {
+  console.log('Access control for new: ', req.query.n)
+  if (utils.fileFolderAccess(req.session, req.query.n) ) {
+    next();
+  } else {
+    res.status(403).send('You are not allowed create files or folders in this folder');
+  }
+}
+
+router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
 
 /* List directory tree */
 router.post('/dirlist', function(req, res) {
   let response = [];
   let filesRoot = config.UPLOADS_FOLDER;
-  let committees = res.locals.session.user.committees;
+  let committees = req.session.user.committees;
 
-  if (utils.isAdmin(res.locals.session)) {
+  if (utils.isAdmin(req.session)) {
     getDirectories(filesRoot, response);
   } else {
     for (committeeID in committees) {
@@ -41,7 +61,6 @@ router.post('/dirlist', function(req, res) {
 
 /* List files in a directory */
 router.post('/fileslist', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.d);
   var response = [];
   var pathDir = path.join(serverRoot, req.body.d);
 
@@ -65,9 +84,7 @@ router.post('/fileslist', function(req, res) {
 });
 
 /* Copying a file or directory */
-router.post('/copy', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
+router.route('/copy').post(nAccessControl).post( function(req, res) {
   fs.copy(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -78,8 +95,6 @@ router.post('/copy', function(req, res) {
 
 /* Create directory */
 router.post('/createdir', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.d);
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
   fs.mkdir(path.join(serverRoot, req.body.d, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -90,24 +105,22 @@ router.post('/createdir', function(req, res) {
 
 /* Delete a file or directory */
 router.post('/delete', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
   fs.remove(path.join(serverRoot, req.body.f || req.body.d))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
+    console.log(err);
     res.status(500).send({ res:"error", msg: err.toString() });
   });
 });
 
 /* Download file */
 router.get('/download', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.query.f);
   res.download(path.join(serverRoot, req.query.f));
 });
 
 /* Download directory */
 router.get('/downloaddir', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.query.d);
   res.setHeader('Content-disposition', 'attachment; filename=' + path.basename(req.query.d) + '.zip');
   
   var archive = archiver('zip');
@@ -120,9 +133,7 @@ router.get('/downloaddir', function(req, res) {
 });
 
 /* Move a file or directory */
-router.post('/move', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
+router.route('/move').post(nAccessControl).post(function(req, res) {
   fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -133,7 +144,6 @@ router.post('/move', function(req, res) {
 
 /* Rename a file or directory */
 router.post('/rename', function(req, res) {
-  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
   var pathDir = path.dirname(req.body.f || req.body.d);
   fs.rename(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n))
   .then(function() {
@@ -155,7 +165,10 @@ var storage = multer.diskStorage({
 
 function fileFilter(req, file, cb) {
   const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
-  if (config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
+  console.log(req.body)
+  if(!utils.fileFolderAccess(req.session, req.body.d)) {
+    cb(new Error('Upload directory not allowed.'));
+  } else if(config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
     cb(new Error('File extension on not allowed uploads list.'));
   } else if (config.FORBIDDEN_UPLOADS !== undefined && config.FORBIDDEN_UPLOADS !== '' && config.FORBIDDEN_UPLOADS.includes(fileType)) {
     cb(new Error('File extension on forbidden uploads list.'));

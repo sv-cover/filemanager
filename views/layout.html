@@ -20,7 +20,7 @@
 			</div>
 			<div class="collapse navbar-collapse" id="navbar-main-collapse">
 				<ul class="navbar-right">
-				{% if session %}
+				{% if loggedin %}
 					<li><a href="{{logoutURL}}">Logout</a></li>
 				{% else %}
           <li><a href="{{loginURL}}">Login</a></li>

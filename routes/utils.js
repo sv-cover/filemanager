@@ -4,7 +4,18 @@ const path = require('path');
 const gm = require('gm');
 const config = require('../config');
 
-const utils = {};
+let utils = {};
+
+utils.unless = function(middleware, ...paths) {
+  return function(req, res, next) {
+    const pathCheck = paths.some(path => path === req.path);
+    pathCheck ? next() : middleware(req, res, next);
+  };
+};
+
+utils.isCommitteeMember = function(session) {
+  return session && !Array.isArray(session.user.committees) && Object.entries(session.user.committees).length;
+}
 
 utils.isAdmin = function(session) {
   let email = session.user.email;
@@ -22,25 +33,24 @@ utils.isAdmin = function(session) {
   return false;
 };
 
-utils.fileFolderAccessControl = function(res, session, p) {
-  console.log(p);
+utils.fileFolderAccess = function(session, p) {
   let filesRoot = config.UPLOADS_FOLDER;
   let committees = session.user.committees;
   let commiteePath = '';
   let response = false;
-  if (this.isAdmin(session)) {
-    response = true;
-  } else {
-    for (committeeID in committees) {
-      commiteePath = path.join(filesRoot, committeeID);
-      if (p.startsWith(commiteePath)) {
-        response = true;
+  if(p) {
+    if(this.isAdmin(session)) {
+      response = true;
+    } else {
+      for (committeeID in committees) {
+        commiteePath = path.join(filesRoot, committeeID);
+        if (p.startsWith(commiteePath)) {
+          response = true;
+        }
       }
     }
   }
-  if (!response) {
-    res.status(403).send('You are not allowed to access this file/folder.').end();
-  }
+  return response;
 };
 
 utils.checkIfFileExists = function(res, f) {
