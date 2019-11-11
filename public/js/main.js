@@ -388,23 +388,28 @@ function previewFile(){
   if(f){
     clickFirstOnEnter('dlgPreview');
     var dlg = $('#dlgPreview');
+    var height = $(window).height() - 50;
+    var width = $(window).width() - 50;
     dlg.empty();
     if (f.IsImage()) {
+      var ratio = (width - 24) / parseInt(f.width);
+      height = Math.min(parseInt(f.height) * ratio + 50, height);
       dlg.append('<img src="' + f.fullPath + '"></img>');
     } else {
-      dlg.append('<iframe frameborder="0" src="' + f.fullPath + '"></img>');
+      dlg.append('<iframe src="' + f.fullPath + '"></img>');
     }
     dlg.dialog({
       title: f.fullPath,
       modal: true,
       draggable: false,
-      width: $(window).width() - 50,
-      height: $(window).height() - 50,
+      height: height,
+      width: width,
+      position: { my: "center", at: "top", of: window },
+      open: function() {},
       close: function() {
         dlg.empty();
       }
     });
-    
   }
 }
 function downloadFile(){

@@ -69,12 +69,17 @@ ul{
 .bottomLine{background:#DDD;border-top:1px solid #CCC;}
 .pale{opacity:0.5;}
 #dlgPreview iframe{
-  width: 99%;
-  height: 99%;
+  border:none;
+  display: block;
+  width:99%;
+  height:99%;
 }
 #dlgPreview img{
-  width: 99%;
-  height: 99%;
+  display: block;
+  max-width:99%;
+  max-height:99%;
+  width: auto;
+  height: auto;
 }
 /* Search and order fields */
 #txtSearch,#ddlOrder{
