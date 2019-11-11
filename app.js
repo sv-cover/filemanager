@@ -51,12 +51,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
 
-// Set locals
-app.locals.title = 'Fileman';
-app.locals.config = config;
-
 // Image manipulation api
 app.use('/images', images);
+
+// Set locals
+app.locals.title = 'Fileman';
 
 // checks if the user is logged in to cover
 app.use('/', coverapi);

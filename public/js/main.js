@@ -386,7 +386,19 @@ function deleteFile(){
 function previewFile(){
   var f = getSelectedFile();
   if(f){
-    window.open(f.fullPath);
+    clickFirstOnEnter('dlgPreview');
+    $('#dlgPreview img').attr("src",f.fullPath);
+    $('#dlgPreview').dialog({
+      title: f.fullPath,
+      modal: true,
+      draggable: false,
+      width: $(window).width() - 50,
+      height: $(window).height() - 50,
+      close: function() {
+        $('#dlgPreview img').attr("src",'#');
+      }
+    });
+    
   }
 }
 function downloadFile(){

@@ -38,7 +38,7 @@ ul{
   width:100%;
   height:100%;
 }
-#wraper,#dlgNewDir,#dlgFileProp,#dlgAddFile,#menuDir,
+#wraper,#dlgNewDir,#dlgFileProp,#dlgAddFile,#dlgPreview,#menuDir,
 #menuFile,#pnlRenameFile,#pnlLoadingDirs,
 #pnlDirName,#pnlLoading,#pnlEmptyDir,
 #pnlSearchNoFiles,#pnlFileProp, #pnlDirList ul{
@@ -68,6 +68,10 @@ ul{
 }
 .bottomLine{background:#DDD;border-top:1px solid #CCC;}
 .pale{opacity:0.5;}
+#dlgPreview img{
+  width: 99%;
+  height: 99%;
+}
 /* Search and order fields */
 #txtSearch,#ddlOrder{
   border:1px solid #CCC;
