@@ -1,16 +1,16 @@
 'use strict';
 
-var StreamingCache = require('streaming-cache');
+const StreamingCache = require('streaming-cache');
 
-var defaults = {
+const defaults = {
     length: function (cachedObject) {
         return cachedObject && cachedObject.data ? cachedObject.data.length : 0;
     }
 };
 
-const cache = function (config) {
-    var options = Object.assign({}, defaults, config);
+const memCache = function (options) {
+    options = Object.assign({}, defaults, options);
     return new StreamingCache(options);
 };
 
-module.exports = cache;
+module.exports = memCache;

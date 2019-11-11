@@ -5,13 +5,14 @@ var path = require('path');
 var sizeOf = require('image-size');
 var multer  = require('multer');
 var archiver = require('archiver');
+const cache = require('../cache');
 const config = require('../config');
 const utils = require('./utils');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
 router.use('/', function(req, res, next) {
-  if (req.session === undefined || req.session === null || Array.isArray(req.session.user.committees) || req.session.user.committees.length == 0) {
+  if (res.locals.session === undefined || res.locals.session === null || Array.isArray(res.locals.session.user.committees) || res.locals.session.user.committees.length == 0) {
     res.status(403).send('You are not allowed to access to the Cover Fileman API');
   } else {
     next()
@@ -22,9 +23,9 @@ router.use('/', function(req, res, next) {
 router.post('/dirlist', function(req, res) {
   let response = [];
   let filesRoot = config.UPLOADS_FOLDER;
-  let committees = req.session.user.committees;
+  let committees = res.locals.session.user.committees;
 
-  if (utils.isAdmin(req.session)) {
+  if (utils.isAdmin(res.locals.session)) {
     getDirectories(filesRoot, response);
   } else {
     for (committeeID in committees) {
@@ -40,7 +41,7 @@ router.post('/dirlist', function(req, res) {
 
 /* List files in a directory */
 router.post('/fileslist', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.d);
   var response = [];
   var pathDir = path.join(serverRoot, req.body.d);
 
@@ -65,8 +66,8 @@ router.post('/fileslist', function(req, res) {
 
 /* Copying a file or directory */
 router.post('/copy', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
-  utils.fileFolderAccessControl(res, req.session, req.body.n);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
   fs.copy(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -77,8 +78,8 @@ router.post('/copy', function(req, res) {
 
 /* Create directory */
 router.post('/createdir', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.d);
-  utils.fileFolderAccessControl(res, req.session, req.body.n);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
   fs.mkdir(path.join(serverRoot, req.body.d, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -89,7 +90,7 @@ router.post('/createdir', function(req, res) {
 
 /* Delete a file or directory */
 router.post('/delete', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
   fs.remove(path.join(serverRoot, req.body.f || req.body.d))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -100,13 +101,13 @@ router.post('/delete', function(req, res) {
 
 /* Download file */
 router.get('/download', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.query.f);
+  utils.fileFolderAccessControl(res, res.locals.session, req.query.f);
   res.download(path.join(serverRoot, req.query.f));
 });
 
 /* Download directory */
 router.get('/downloaddir', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.query.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.query.d);
   res.setHeader('Content-disposition', 'attachment; filename=' + path.basename(req.query.d) + '.zip');
   
   var archive = archiver('zip');
@@ -120,8 +121,8 @@ router.get('/downloaddir', function(req, res) {
 
 /* Move a file or directory */
 router.post('/move', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
-  utils.fileFolderAccessControl(res, req.session, req.body.n);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.n);
   fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
@@ -132,7 +133,7 @@ router.post('/move', function(req, res) {
 
 /* Rename a file or directory */
 router.post('/rename', function(req, res) {
-  utils.fileFolderAccessControl(res, req.session, req.body.f || req.body.d);
+  utils.fileFolderAccessControl(res, res.locals.session, req.body.f || req.body.d);
   var pathDir = path.dirname(req.body.f || req.body.d);
   fs.rename(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n))
   .then(function() {
@@ -140,25 +141,6 @@ router.post('/rename', function(req, res) {
   }).catch(function(err) {
     res.send({ res:"error", msg: err.toString() });
   })
-});
-
-/* Generate thumbnail */
-router.get('/generatethumb', function(req, res) {
-  const query = req.query;
-  if (query.f !== undefined) {
-    const p = path.join(serverRoot, query.f)
-    utils.imageOpen(p).then((image) => {
-      image = image
-        .resize(query.width || '200', query.height || '200', '^')
-        .gravity('Center')
-        .crop(query.width || '200', query.height || '200');
-      utils.imageSend(res, image);
-    }).catch((err) => {
-      res.status(400).send(err).end();
-    });
-  } else {
-    res.status(400).send('Missing query arguments.').end();
-  }
 });
 
 /* Upload files */

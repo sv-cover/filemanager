@@ -1,3 +1,4 @@
+const devnull = require('dev-null');
 const fs = require('fs-extra');
 const path = require('path');
 const gm = require('gm');
@@ -69,8 +70,9 @@ utils.imageOpen = function(p) {
 }
 
 utils.imageSend = function(res, image) {
-  res.setHeader("content-type", "image/png");
-  image.stream('png').pipe(res);
+  res.setHeader('content-type', 'image/' + image.format().data.format);
+  var stream = image.stream();
+  stream.pipe(res);
 };
 
 module.exports = utils;

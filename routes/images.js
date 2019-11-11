@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs-extra');
 const path = require('path');
-const gm = require('gm');
-const config = require('../config');
 const cache = require('../cache');
+const config = require('../config');
 const utils = require('./utils');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
@@ -17,7 +15,7 @@ router.use('/', function(req, res, next) {
   }
 });
 
-router.use('/', cache());
+router.use('/', cache({ max: config.CACHE_MAX_SIZE, maxAge: config.CACHE_MAX_AGE }));
 
 /* 
 Generate resized image by adding ?f=path/to/file&w=width[&h=heigth&o=GraphicsMagickOption]

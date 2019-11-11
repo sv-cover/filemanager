@@ -3,14 +3,16 @@
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const path = require('path');
+const sanatize = require('sanitize-filename');
 const config = require('../config');
-const newCache = require('./lib/cache');
+const DriveCache = require('./lib/drivecache');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
-const options = {
-  max: config.CACHE_MAX_SIZE,
-  maxAge: config.CACHE_MAX_AGE,
+const defaultOptions = {
+  type: 'mem',
+  max: 1024*1024,
+  maxAge: 60*1000,
   cacheableHttpStatusCodes: [200, 304]
 };
 
@@ -18,59 +20,51 @@ const isResponseUncacheable = function(opts, res) {
   return opts.cacheableHttpStatusCodes.indexOf(res.statusCode) === -1 || res.nocache;
 };
 
-const cache = function() {
+const cache = function(options = {}) {
   if(!config.CACHE_USE) {
-    return function(req, res, next) { next(); }
+    return function(req, res, next) { res.cache = devnull(); next(); }
   }
+  options = Object.assign({}, defaultOptions, options)
+  let cache = null;
 
-  let cache = newCache(options);
+  cache = DriveCache(options);
 
   const middleware = function(req, res, next) {
-    const key = req.url;
+    const key = sanatize(req.url);
 
     fs.stat(path.join(serverRoot, req.query.f))
-    .then(function(info) {
+    .then(info => {
       const fileLastUpdated = info.mtimeMs;
+      let readStream =  cache.get(key);
+      let metadata = cache.getMetadata(key);
 
-      if (cache.exists(key)) {
-        let metaData = cache.getMetadata(key);
-        let stream = cache.get(key);
-  
-        if (metaData.fileLastUpdated === fileLastUpdated && stream) {
-          return stream.pipe(res);
-        }
+      if (!readStream || (metadata && metadata.fileLastUpdated !=  fileLastUpdated)) {
+        console.log('Cache miss for: ' + key);
+        cache.setMetadata(key, {});
+        res.on('pipe', (src) => {
+          src.pipe(cache.set(key));
+          console.log(res.get('Content-Type'))
+          cache.setMetadata(key, {
+            contentType: res.get('Content-Type'),
+            fileLastUpdated: fileLastUpdated
+          });
+        });
+        
+        res.on('finish', function () {
+          console.log('Finished writing')
+          if (isResponseUncacheable(options, res)) {
+            console.log('Error response');
+            cache.del(key);
+          }
+        });
+
+        next();
+      } else {
+        console.log('Read cached data for: ' + key);
+        res.setHeader('content-type', metadata.contentType);
+        return readStream.pipe(res);
       }
-      
-      // Cache miss for the url
-      console.log('Cache miss for: ' + key);
-      let newStream = cache.set(key);
-      let metaData = cache.getMetadata(key);
-  
-      let _write = res.write.bind(res);
-  
-      res.write = function (chunk, encoding) {
-        newStream.write(chunk, encoding);
-        return _write(chunk, encoding);
-      };
-  
-      res.on('finish', function () {
-        newStream.end();
-        newStream.pipe(devnull());
-  
-        if (!metaData) {
-          console.log('cache item was immediately expired: ' + req.url);
-        } else {
-          // Set metadata
-          metaData.fileLastUpdated = fileLastUpdated;
-        }
-  
-        if (isResponseUncacheable(options, res)) {
-          cache.del(key);
-        }
-      });
-  
-      next();
-    }).catch(function(err) {
+    }).catch(err => {
       console.log('File did not exist while caching: ' + err);
       next();
     });

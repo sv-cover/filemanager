@@ -8,7 +8,8 @@ var bodyParser = require('body-parser');
 var cons = require('consolidate');
 var nunjucks = require('nunjucks');
 var app = express();
-var coverapi = require('./coverapi');
+const cache = require('./cache');
+const coverapi = require('./coverapi');
 const config = require('./config');
 
 hasGraphicsMagick = function() {
@@ -49,6 +50,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
+
+// Set locals
+app.locals.title = 'Fileman';
 
 // Image manipulation api
 app.use('/images', images);

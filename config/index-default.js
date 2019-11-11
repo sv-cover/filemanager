@@ -1,4 +1,4 @@
-let config = require('./fileman');
+let fileman = require('./fileman');
 
 const config = {...{
     /* Cover API */

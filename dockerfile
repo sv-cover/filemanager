@@ -20,6 +20,7 @@ RUN npm install
 # Bundle app source
 COPY . .
 VOLUME "/usr/src/app/public/uploads"
+VOLUME "/usr/src/app/cachestorage"
 
 EXPOSE 3000
 CMD [ "node", "./bin/www" ]
