@@ -68,6 +68,10 @@ ul{
 }
 .bottomLine{background:#DDD;border-top:1px solid #CCC;}
 .pale{opacity:0.5;}
+#dlgPreview iframe{
+  width: 99%;
+  height: 99%;
+}
 #dlgPreview img{
   width: 99%;
   height: 99%;

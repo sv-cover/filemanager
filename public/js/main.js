@@ -387,15 +387,21 @@ function previewFile(){
   var f = getSelectedFile();
   if(f){
     clickFirstOnEnter('dlgPreview');
-    $('#dlgPreview img').attr("src",f.fullPath);
-    $('#dlgPreview').dialog({
+    var dlg = $('#dlgPreview');
+    dlg.empty();
+    if (f.IsImage()) {
+      dlg.append('<img src="' + f.fullPath + '"></img>');
+    } else {
+      dlg.append('<iframe frameborder="0" src="' + f.fullPath + '"></img>');
+    }
+    dlg.dialog({
       title: f.fullPath,
       modal: true,
       draggable: false,
       width: $(window).width() - 50,
       height: $(window).height() - 50,
       close: function() {
-        $('#dlgPreview img').attr("src",'#');
+        dlg.empty();
       }
     });
     
