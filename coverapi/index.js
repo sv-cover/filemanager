@@ -1,6 +1,11 @@
 const config = require('../config/');
 const coverAPI = require('./coverapi');
 
+/* 
+Hastily made middleware function to connect with the cover api.
+The results are stored in the req.session object.
+
+*/
 const coverapi = function (req, res, next) {
     const fullUrl = encodeURI(req.protocol + '://' + req.get('host') + req.originalUrl);
     req.session = null;

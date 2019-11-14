@@ -11,6 +11,7 @@ router.get('/', function(req, res, next) {
   }
 });
 
+// GET fileman page
 router.get('/fileman', function(req, res, next) {
   if (utils.isCommitteeMember) {
     res.render('fileman');

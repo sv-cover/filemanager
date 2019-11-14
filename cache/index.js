@@ -1,6 +1,5 @@
 'use strict';
 
-const devnull = require('dev-null');
 const fs = require('fs-extra');
 const path = require('path');
 const sanatize = require('sanitize-filename');
@@ -16,13 +15,15 @@ const defaultOptions = {
   cacheableHttpStatusCodes: [200, 304]
 };
 
+// Checks if the response is not in opts.cacheableHttpStatusCodes.
 const isResponseUncacheable = function(opts, res) {
   return opts.cacheableHttpStatusCodes.indexOf(res.statusCode) === -1 || res.nocache;
 };
 
+// Returns a caching middleware function
 const cache = function(options = {}) {
   if(!config.CACHE_USE) {
-    return function(req, res, next) { res.cache = devnull(); next(); }
+    return function(req, res, next) { next(); }
   }
   options = Object.assign({}, defaultOptions, options)
   let cache = null;
@@ -39,11 +40,10 @@ const cache = function(options = {}) {
       let metadata = cache.getMetadata(key);
 
       if (!readStream || (metadata && metadata.fileLastUpdated !=  fileLastUpdated)) {
-        console.log('Cache miss for: ' + key);
+        console.info('Cache miss for: ' + key);
         cache.setMetadata(key, {});
         res.on('pipe', (src) => {
           src.pipe(cache.set(key));
-          console.log(res.get('Content-Type'))
           cache.setMetadata(key, {
             contentType: res.get('Content-Type'),
             fileLastUpdated: fileLastUpdated
@@ -51,21 +51,19 @@ const cache = function(options = {}) {
         });
         
         res.on('finish', function () {
-          console.log('Finished writing')
           if (isResponseUncacheable(options, res)) {
-            console.log('Error response');
+            console.war('Error in response, response deleted from cache.');
             cache.del(key);
           }
         });
 
         next();
       } else {
-        console.log('Read cached data for: ' + key);
         res.setHeader('content-type', metadata.contentType);
         return readStream.pipe(res);
       }
     }).catch(err => {
-      console.log('File did not exist while caching: ' + err);
+      console.warn('File did not exist trying to cache: ' + err.toString());
       next();
     });
   }

@@ -4,19 +4,6 @@ var Fileman = function(url) {
   var imageResizeURL = filemanURL + '/images/resize';
 
   function _nothing() { return };
-  
-  function _createUrl(file, options) {
-    var url = null;
-    if (options) {
-      url = imageResizeURL + '?f=' + file.fullPath;
-      for(key in options) {
-        url = url + '&' + key + '=' + options[key];
-      }
-      console.log(url);
-      return url;
-    }
-    return filemanURL + '/' + file.fullPath;
-  }
 
   this._funcShow = _nothing;
   this._funcSelect = _nothing;
@@ -31,6 +18,18 @@ var Fileman = function(url) {
       this._funcClose();
     }
   }, false);
+  
+  this.createUrl = function(file, options) {
+    var url = null;
+    if (options) {
+      url = imageResizeURL + '?f=' + file.fullPath;
+      for(key in options) {
+        url = url + '&' + key + '=' + options[key];
+      }
+      return url;
+    }
+    return filemanURL + '/' + file.fullPath;
+  }
 
   /* 
     The function funcShow should display the element containing the fileman iframe.
@@ -49,7 +48,7 @@ var Fileman = function(url) {
   this.connectInputOnClick = function(funcShow, funcClose, input, options) {
     document.querySelectorAll(input).forEach(elem => {
       elem.addEventListener('click', this.connect(funcShow, funcClose, file => {
-        elem.value = _createUrl(file, options);
+        elem.value = this.createUrl(file, options);
       }));
     });
   };
@@ -57,7 +56,7 @@ var Fileman = function(url) {
   this.connectImgOnClick = function(funcShow, funcClose, img, options) {
     document.querySelectorAll(img).forEach(elem => {
       elem.onclick = this.connect(funcShow, funcClose, file => {
-        elem.src = _createUrl(file, options);
+        elem.src = this.createUrl(file, options);
       });
     });
   };

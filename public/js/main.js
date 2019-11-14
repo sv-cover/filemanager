@@ -454,8 +454,8 @@ function tooltipContent(){
   else if(f.IsImage()){
     if(RoxyFilemanConf.GENERATETHUMB){
       imgUrl = RoxyUtils.AddParam(RoxyFilemanConf.GENERATETHUMB, 'f', f.fullPath);
-      imgUrl = RoxyUtils.AddParam(imgUrl, 'width', RoxyFilemanConf.PREVIEW_THUMB_WIDTH);
-      imgUrl = RoxyUtils.AddParam(imgUrl, 'height', RoxyFilemanConf.PREVIEW_THUMB_HEIGHT);
+      imgUrl = RoxyUtils.AddParam(imgUrl, 'w', RoxyFilemanConf.PREVIEW_THUMB_WIDTH);
+      imgUrl = RoxyUtils.AddParam(imgUrl, 'h', RoxyFilemanConf.PREVIEW_THUMB_HEIGHT);
     }
     else
       imgUrl = f.fullPath;
@@ -523,8 +523,8 @@ function switchView(t){
       var imgUrl = $(this).attr('data-icon-big');
       if(RoxyFilemanConf.GENERATETHUMB && RoxyUtils.IsImage($(this).attr('data-path'))){
         imgUrl = RoxyUtils.AddParam(RoxyFilemanConf.GENERATETHUMB, 'f', imgUrl);
-        imgUrl = RoxyUtils.AddParam(imgUrl, 'width', RoxyFilemanConf.THUMBS_VIEW_WIDTH);
-        imgUrl = RoxyUtils.AddParam(imgUrl, 'height', RoxyFilemanConf.THUMBS_VIEW_HEIGHT);
+        imgUrl = RoxyUtils.AddParam(imgUrl, 'w', RoxyFilemanConf.THUMBS_VIEW_WIDTH);
+        imgUrl = RoxyUtils.AddParam(imgUrl, 'h', RoxyFilemanConf.THUMBS_VIEW_HEIGHT);
       }
       $(this).children('.icon').css('background-image', 'url('+imgUrl+')');
       $(this).tooltip('option', 'show', {delay:50});

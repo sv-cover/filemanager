@@ -12,11 +12,11 @@ const defaults = {
       return n.length ? n.length : 0;
     },
   dispose: function(key, n) {
-    console.log('Dispose of: ' + key);
+    console.info('Dispose of: ' + key);
     try {
       fs.unlinkSync(n.path);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 };
@@ -29,14 +29,15 @@ function DriveCache(options) {
 
   this.saveCache = function() {
     fs.writeJson(this.save, this.cache.dump(), err => {
-      if (err) console.log(err);
+      if (err) console.error(err);
     });
   }
 
+  // Tries to load an existing saved cache
   this.loadCache = function() {
     fs.readJson(this.save, (err, packageObj) => {
       if (err) {
-        console.error(err)
+        console.warn(err)
       } else {
         this.cache.load(packageObj)
       }
@@ -45,6 +46,10 @@ function DriveCache(options) {
 
   this.loadCache();
 
+  /*
+  Gets the cached stream for key. If the key does not exist
+  the function will return undefined.
+  */
   this.get = function(key) {
     let hit = this.cache.get(key);
 
@@ -66,11 +71,14 @@ function DriveCache(options) {
       throw new Error('File ' + hit.path + ' does not exist.')
       
     } catch (error) {
-      console.log(error);
+      console.warn(error);
       return undefined
     }
   }
 
+  /*
+  Returns a writable stream for key.
+  */
   this.set = key => {
     const p = path.join(this.options.cacheRoot, key);
     let stream = fs.createWriteStream(p);
@@ -86,18 +94,21 @@ function DriveCache(options) {
     return stream;
   }
 
+  // Gets the metadata for key.
   this.getMetadata = function(key) {
     var hit = this.cache.get(key);
 
     return hit && hit.metadata ? hit.metadata : null;
   }
 
+  // Sets the metadata for key.
   this.setMetadata = function(key, metadata) {
     var data = Object.assign({}, this.cache.get(key), { metadata: metadata })
     this.cache.set(key, data);
     this.saveCache();
   }
 
+  // Deletes the stored stream and metadata for key
   this.del = function(key) {
     this.cache.del(key);
     this.saveCache();

@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "node ./bin/www",
+    "test": "nodemon ./bin/www"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "test/*",
+      "cachestorage/*"
+    ]
   },
   "dependencies": {
     "archiver": "^3.0.0",
@@ -11,7 +18,6 @@
     "consolidate": "^0.15.1",
     "cookie-parser": "~1.4.3",
     "debug": "^4.1.1",
-    "dev-null": "^0.1.1",
     "express": "^4.13.4",
     "fs-extra": "^8.1.0",
     "gm": "^1.23.0",
@@ -24,8 +30,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "sanitize-filename": "^1.6.3",
-    "serve-favicon": "^2.5.0",
-    "streaming-cache": "^0.5.5"
+    "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
     "eslint": "^6.6.0",

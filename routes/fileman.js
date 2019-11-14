@@ -5,22 +5,24 @@ var path = require('path');
 var sizeOf = require('image-size');
 var multer  = require('multer');
 var archiver = require('archiver');
-const cache = require('../cache');
 const config = require('../config');
 const utils = require('./utils');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
+// A middleware function to check if the user is in a cover committee.
 router.use('/', function(req, res, next) {
+  console.log(req.session)
   if (utils.isCommitteeMember(req.session)) {
     next();
   } else {
+    console.warn('ID' + req.session.id + 'tried to access the filemanager and has no access.');
     res.status(403).send('You are not allowed to access to the Cover Fileman API');
   }
 });
 
+// A middleware function that checks if you have access to the file or directory in the query.
 function fDAccessControl(req, res, next) {
-  console.log('Access control for: ', req.query.f || req.query.d)
   if (!(req.query.f && req.query.d) && utils.fileFolderAccess(req.session, req.query.f || req.query.d) ) {
     next();
   } else {
@@ -28,6 +30,7 @@ function fDAccessControl(req, res, next) {
   }
 }
 
+// A middleware function that checks if you have access to the new location in the query
 function nAccessControl(req, res, next) {
   console.log('Access control for new: ', req.query.n)
   if (utils.fileFolderAccess(req.session, req.query.n) ) {
@@ -37,9 +40,14 @@ function nAccessControl(req, res, next) {
   }
 }
 
+// Adds the fDAccessControl middleware to all routes in fileman.js except for dirlist and upload
 router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
 
-/* List directory tree */
+/* 
+Return the directory tree.
+For admins it returns the route.
+For committee members only there committee folders.
+*/
 router.post('/dirlist', function(req, res) {
   let response = [];
   let filesRoot = config.UPLOADS_FOLDER;
@@ -89,7 +97,8 @@ router.route('/copy').post(nAccessControl).post( function(req, res) {
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
-    res.status(500).send({ res:"error", msg: err.toString() });
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Copying the file failed.' });
   });
 });
 
@@ -99,7 +108,8 @@ router.post('/createdir', function(req, res) {
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
-    res.status(500).send({ res:"error", msg: err.toString() });
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Creating the directory failed.' });
   });
 });
 
@@ -109,8 +119,8 @@ router.post('/delete', function(req, res) {
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
-    console.log(err);
-    res.status(500).send({ res:"error", msg: err.toString() });
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Deleting the file failed.' });
   });
 });
 
@@ -138,7 +148,8 @@ router.route('/move').post(nAccessControl).post(function(req, res) {
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
-    res.status(500).send({ res:"error", msg: err.toString() });
+    console.warn(err)
+    res.status(500).send({ res:"error", msg: 'Moving the file failed.' });
   });
 });
 
@@ -149,7 +160,8 @@ router.post('/rename', function(req, res) {
   .then(function() {
     res.send({ res: "ok", msg: "Success" });
   }).catch(function(err) {
-    res.send({ res:"error", msg: err.toString() });
+    console.warn(err)
+    res.send({ res:"error", msg: 'Renaming the file failed.' });
   })
 });
 
@@ -163,6 +175,7 @@ var storage = multer.diskStorage({
   }
 });
 
+// Filters files based on access and upload list in config
 function fileFilter(req, file, cb) {
   const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
   console.log(req.body)
@@ -180,6 +193,7 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).array('files[]
 router.post('/upload', function(req, res) {
   upload(req, res, function (err) {
     if (err) {
+      console.warn(err);
       res.send({ res:"error", msg: err.toString() });
     }
     else{

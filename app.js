@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 var cons = require('consolidate');
 var nunjucks = require('nunjucks');
 var app = express();
-const cache = require('./cache');
 const coverapi = require('./coverapi');
 const config = require('./config');
 
