@@ -19,7 +19,7 @@ const coverapi = function (req, res, next) {
             res.locals.loggedin = true;
             next();
         }).catch(function(err) {
-            console.log(err);
+            console.error(err);
             res.status(403).send('Something went wrong with the CoverAPI');
         });
     } else {

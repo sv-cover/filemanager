@@ -13,7 +13,6 @@ var Fileman = function(url) {
   window.addEventListener('message', event => {
     if (event.origin === filemanURL) {
       const file = JSON.parse(event.data);
-      console.log(file);
       this._funcSelect(file);
       this._funcClose();
     }

@@ -14,7 +14,7 @@ const config = require('./config');
 hasGraphicsMagick = function() {
   exec("gm -help", function (err) {
     if (err) {
-      console.log(err);
+      console.error(err);
       app.locals.hasGM = false;
     } else {
       app.locals.hasGM = true;
@@ -67,7 +67,7 @@ app.use('/fileman', fileman);
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-    console.log(err);
+    console.error(err);
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,

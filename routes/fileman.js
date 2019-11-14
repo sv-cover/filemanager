@@ -5,6 +5,7 @@ var path = require('path');
 var sizeOf = require('image-size');
 var multer  = require('multer');
 var archiver = require('archiver');
+const customDiskStorage = require('./diskStorage');
 const config = require('../config');
 const utils = require('./utils');
 
@@ -12,7 +13,6 @@ const serverRoot = path.join('.', config.SERVER_ROOT);
 
 // A middleware function to check if the user is in a cover committee.
 router.use('/', function(req, res, next) {
-  console.log(req.session)
   if (utils.isCommitteeMember(req.session)) {
     next();
   } else {
@@ -32,7 +32,6 @@ function fDAccessControl(req, res, next) {
 
 // A middleware function that checks if you have access to the new location in the query
 function nAccessControl(req, res, next) {
-  console.log('Access control for new: ', req.query.n)
   if (utils.fileFolderAccess(req.session, req.query.n) ) {
     next();
   } else {
@@ -174,11 +173,11 @@ var storage = multer.diskStorage({
     cb(null, file.originalname);
   }
 });
+storage._handleFile = customDiskStorage;
 
 // Filters files based on access and upload list in config
 function fileFilter(req, file, cb) {
   const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
-  console.log(req.body)
   if(!utils.fileFolderAccess(req.session, req.body.d)) {
     cb(new Error('Upload directory not allowed.'));
   } else if(config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
