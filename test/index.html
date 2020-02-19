@@ -63,17 +63,6 @@
       <input type="button" id="testButton" name="testButton" placeholder="Path to selected file will be displayed here">
     </div>
   <div>
-  <div>
-    <img id="testImg" src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Click on the image to change it">
-  </div>
-  <div>
-    <img id="testImgOptions" src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Click on the image to change it">
-  </div>
-  <div>
-    <picture id="testPicture">
-      <img src="https://sd.svcover.nl/Corporate%20Identity/Logo/cover_logo.png" alt="Test pictures" style="width:auto;">
-    </picture>
-  </div>
 
   <!-- The Modal -->
   <div id="iframe" class="modal">
@@ -85,7 +74,6 @@
   </div>
 
   <script type="text/javascript">
-    var fileman = new Fileman('http://localhost:3000');
     var iframe = document.getElementById('iframe');
 
     function showModal() {
@@ -95,12 +83,11 @@
     function closeModal() {
       iframe.style.display = "none";
     }
+    
+    var fileman = new Fileman('http://localhost:3000', showModal, closeModal);
 
-    fileman.connectInputOnClick(showModal, closeModal, '#testText');
-    fileman.connectInputOnClick(showModal, closeModal, '#testButton');
-    fileman.connectImgOnClick(showModal, closeModal, '#testImg');
-    fileman.connectImgOnClick(showModal, closeModal, '#testImgOptions', {w: 200, h: 200});
-    fileman.connectPictures(showModal, closeModal, '#testPicture', [1000, 600, 400]);
+    fileman.connectInputOnClick('#testText');
+    fileman.connectInputOnClick('#testButton');
   </script>
 </body>
 </html>
