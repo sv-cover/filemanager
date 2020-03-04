@@ -33,11 +33,11 @@
     var iframe = document.getElementById('iframe');
 
     function showModal() {
-      iframe.style.display = "block";
+      iframe.classList.add("is-active");
     }
 
     function closeModal() {
-      iframe.style.display = "none";
+      iframe.classList.remove("is-active");
     }
     
     var fileman = new Fileman('http://localhost:3000', showModal, closeModal);
