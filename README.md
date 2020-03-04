@@ -1,7 +1,6 @@
 # Cover Fileman
 
-A rework of Roxy Filemanager for Cover
-The original source code can be found at **[Roxy Fileman](http://www.roxyfileman.com)**.
+A rework of Roxy Filemanager for Cover.
 
 # Cover api
 If you want to test the site on your local machine (which you should do!), you
@@ -15,7 +14,7 @@ php -S  127.0.0.1:8080
 Now you can log in to your local server using the login details in the coverapi tester script!
 
 # Intergration Tests
-When you have the app running you can test and see examples on how to intergrate the app into an website in test.
+When you have the app running you can test and see examples on how to intergrate the app into an website in the folder 'test'.
 
 # Docker instructions
 To test the container locally:
@@ -39,3 +38,7 @@ To test the container locally:
  * Copy config/fileman-default.js to config/fileman.js
  * Execute the commands: `npm install && npm start`
  * Try in the browser http://localhost:3000
+ 
+ # Credits
+  * Lyubomir Arsov - www.roxyfileman.com
+  * Juan David Nicholls Cardona - https://github.com/proyecto26/Roxy-Fileman-for-Node.js
