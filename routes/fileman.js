@@ -3,41 +3,74 @@ var router = express.Router();
 var fs = require('fs-extra');
 var path = require('path');
 var sizeOf = require('image-size');
-var gm = require('gm');
-var exec = require('child_process').exec;
 var multer  = require('multer');
 var archiver = require('archiver');
+const customDiskStorage = require('./diskStorage');
+const config = require('../config');
+const utils = require('./utils');
 
-var serverRoot = './public/';
+const serverRoot = path.join('.', config.SERVER_ROOT);
 
+// A middleware function to check if the user is in a cover committee.
 router.use('/', function(req, res, next) {
-  if (req.session == null || req.session == undefined) {
-    res.status(403).send('You are not allowed to access Cover Fileman');
+  if (utils.isCommitteeMember(req.session)) {
+    next();
   } else {
-    next()
+    console.warn('ID' + req.session.id + 'tried to access the filemanager and has no access.');
+    res.status(403).send('You are not allowed to access to the Cover Fileman API');
   }
 });
 
-router.get('/', function(req, res, next) {
-  res.render('fileman', { title: 'Cover File Manager' });
-});
+// A middleware function that checks if you have access to the file or directory in the query.
+function fDAccessControl(req, res, next) {
+  if (!(req.query.f && req.query.d) && utils.fileFolderAccess(req.session, req.query.f || req.query.d) ) {
+    next();
+  } else {
+    res.status(403).send('You are not allowed access to this file or folder');
+  }
+}
 
-/* List directory tree */
+// A middleware function that checks if you have access to the new location in the query
+function nAccessControl(req, res, next) {
+  if (utils.fileFolderAccess(req.session, req.query.n) ) {
+    next();
+  } else {
+    res.status(403).send('You are not allowed create files or folders in this folder');
+  }
+}
+
+// Adds the fDAccessControl middleware to all routes in fileman.js except for dirlist and upload
+router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
+
+/* 
+Return the directory tree.
+For admins it returns the route.
+For committee members only there committee folders.
+*/
 router.post('/dirlist', function(req, res) {
-  
-  var response = [];  
-  var filesRoot = 'Uploads';
-  
-  getDirectories(filesRoot, response);
-  
+  let response = [];
+  let filesRoot = config.UPLOADS_FOLDER;
+  let committees = req.session.user.committees;
+
+  if (utils.isAdmin(req.session)) {
+    getDirectories(filesRoot, response);
+  } else {
+    for (committeeID in committees) {
+      let responseTemp = [];
+      
+      getDirectories(path.join(filesRoot, committeeID), responseTemp);
+      response = response.concat(responseTemp);
+    }
+  }
+
   res.send(response);
 });
 
 /* List files in a directory */
 router.post('/fileslist', function(req, res) {
-  
   var response = [];
-  var pathDir = serverRoot + req.body.d;
+  var pathDir = path.join(serverRoot, req.body.d);
+
   fs.readdirSync(pathDir).map(function(file) {
     var fileDir = path.join(pathDir, file);
     var info = fs.statSync(fileDir); 
@@ -58,96 +91,77 @@ router.post('/fileslist', function(req, res) {
 });
 
 /* Copying a file or directory */
-router.post('/copy', function(req, res) {
-  
-  try {
-    fs.copySync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n));
+router.route('/copy').post(nAccessControl).post( function(req, res) {
+  fs.copy(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Copying the file failed.' });
+  });
 });
 
 /* Create directory */
 router.post('/createdir', function(req, res) {
-  try {
-    fs.mkdirsSync(path.join(serverRoot, req.body.d, req.body.n));
+  fs.mkdir(path.join(serverRoot, req.body.d, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Creating the directory failed.' });
+  });
 });
 
 /* Delete a file or directory */
 router.post('/delete', function(req, res) {
-  try {
-    fs.removeSync(path.join(serverRoot, req.body.f || req.body.d));
+  fs.remove(path.join(serverRoot, req.body.f || req.body.d))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
+  }).catch(function(err) {
+    console.warn(err);
+    res.status(500).send({ res:"error", msg: 'Deleting the file failed.' });
+  });
 });
 
 /* Download file */
 router.get('/download', function(req, res) {
-  
   res.download(path.join(serverRoot, req.query.f));
 });
 
 /* Download directory */
 router.get('/downloaddir', function(req, res) {
-    
   res.setHeader('Content-disposition', 'attachment; filename=' + path.basename(req.query.d) + '.zip');
   
   var archive = archiver('zip');
   archive.pipe(res);
-  archive.bulk([
-    { expand: true, cwd: path.join(serverRoot, req.query.d), src: ['**/*'] }
-  ]);
+  archive.glob('**/*', {
+    expand: true,
+    cwd: path.join(serverRoot, req.query.d)
+  });
   archive.finalize();
 });
 
 /* Move a file or directory */
-router.post('/move', function(req, res) {
-  
-  fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n), function (err) {
-    if (err) {
-        res.send({ res:"error", msg: err });
-    }
-    else{
-        res.send({ res: "ok", msg: "Success" });
-    }
+router.route('/move').post(nAccessControl).post(function(req, res) {
+  fs.move(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, req.body.n))
+  .then(function() {
+    res.send({ res: "ok", msg: "Success" });
+  }).catch(function(err) {
+    console.warn(err)
+    res.status(500).send({ res:"error", msg: 'Moving the file failed.' });
   });
 });
 
 /* Rename a file or directory */
 router.post('/rename', function(req, res) {
   var pathDir = path.dirname(req.body.f || req.body.d);
-  try {
-    fs.renameSync(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n));
+  fs.rename(path.join(serverRoot, req.body.f || req.body.d), path.join(serverRoot, pathDir, req.body.n))
+  .then(function() {
     res.send({ res: "ok", msg: "Success" });
-  } catch (err) {
-    res.send({ res:"error", msg: err });
-  }
-});
-
-/* Generate thumbnail */
-router.get('/generatethumb', function(req, res) {
-
-  exec("gm -help", function (err) {
-    if (err) {
-      res.status(500).send({ error: 'GraphicsMagick is not installed' })
-    } else {
-      res.setHeader("content-type", "image/png");
-  
-      gm(path.join(serverRoot, req.query.f))
-      .resize(req.query.width || '200', req.query.height || '200', '^')
-      .gravity('Center')
-      .crop(req.query.width || '200', req.query.height || '200')
-      .stream('png')
-      .pipe(res);  
-    }
-  });
+  }).catch(function(err) {
+    console.warn(err)
+    res.send({ res:"error", msg: 'Renaming the file failed.' });
+  })
 });
 
 /* Upload files */
@@ -159,12 +173,27 @@ var storage = multer.diskStorage({
     cb(null, file.originalname);
   }
 });
+storage._handleFile = customDiskStorage;
 
-var upload = multer({ storage: storage }).array('files[]');
+// Filters files based on access and upload list in config
+function fileFilter(req, file, cb) {
+  const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
+  if(!utils.fileFolderAccess(req.session, req.body.d)) {
+    cb(new Error('Upload directory not allowed.'));
+  } else if(config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
+    cb(new Error('File extension on not allowed uploads list.'));
+  } else if (config.FORBIDDEN_UPLOADS !== undefined && config.FORBIDDEN_UPLOADS !== '' && config.FORBIDDEN_UPLOADS.includes(fileType)) {
+    cb(new Error('File extension on forbidden uploads list.'));
+  }
+  cb(null, true);
+}
+
+var upload = multer({ storage: storage, fileFilter: fileFilter }).array('files[]');
 router.post('/upload', function(req, res) {
   upload(req, res, function (err) {
     if (err) {
-      res.send({ res:"error", msg: err });
+      console.warn(err);
+      res.send({ res:"error", msg: err.toString() });
     }
     else{
       res.send({ res: "ok", msg: "Success" });  
@@ -173,7 +202,6 @@ router.post('/upload', function(req, res) {
 });
 
 var getDirectories = function(srcpath, response) {
-  
   var info = {
     p: srcpath.replace(/\\/g, '/'),
     f: 0,
@@ -181,9 +209,9 @@ var getDirectories = function(srcpath, response) {
   };
   response.push(info);
   
-  fs.readdirSync(serverRoot + srcpath).map(function(file) {
+  fs.readdirSync(path.join(serverRoot, srcpath)).map(function(file) {
     var pathDir = path.join(srcpath, file);
-    if(fs.statSync(serverRoot + pathDir).isDirectory()){
+    if(fs.statSync(path.join(serverRoot, pathDir)).isDirectory()){
         info.d++;
         getDirectories(pathDir, response);
     }else{

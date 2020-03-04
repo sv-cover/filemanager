@@ -1,3 +1,4 @@
+const exec = require('child_process').exec;
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -7,7 +8,22 @@ var bodyParser = require('body-parser');
 var cons = require('consolidate');
 var nunjucks = require('nunjucks');
 var app = express();
-var coverapi = require('./coverapi');
+const coverapi = require('./coverapi');
+const config = require('./config');
+
+hasGraphicsMagick = function() {
+  exec("gm -help", function (err) {
+    if (err) {
+      console.error(err);
+      app.locals.hasGM = false;
+    } else {
+      app.locals.hasGM = true;
+    }
+  });
+};
+
+// Check if GraphicsMagick is installed.
+hasGraphicsMagick();
 
 // add nunjucks to requires so filters can be
 // added and the same instance will be used inside the render method
@@ -16,9 +32,10 @@ cons.requires.nunjucks = nunjucks.configure('views', {
   express   : app
 });
 
-var routes = require('./routes/index');
-var conf = require('./routes/conf');
-var fileman = require('./routes/fileman');
+const routes = require('./routes/index');
+const conf = require('./routes/conf');
+const fileman = require('./routes/fileman');
+const images = require('./routes/images');
 
 // view engine setup
 app.engine('html', cons.nunjucks);
@@ -26,12 +43,18 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, config.SERVER_ROOT)));
+
+// Image manipulation api
+app.use('/images', images);
+
+// Set locals
+app.locals.title = 'Fileman';
 
 // checks if the user is logged in to cover
 app.use('/', coverapi);
@@ -44,6 +67,7 @@ app.use('/fileman', fileman);
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+    console.error(err);
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,

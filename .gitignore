@@ -1,6 +1,14 @@
-/node_modules
-/public/uploads
+node_modules
+public/uploads
 npm-debug.log
+
+cachestorage/*
+!cachestorage/cachestorage.txt
 
 #Code editors
 .vscode
+.devcontainer
+
+#test scripts
+*.ps1
+*.sh

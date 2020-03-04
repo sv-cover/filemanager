@@ -16,14 +16,14 @@
 					<span class="navicon navicon-white"></span>
 				</button>
 				<a href="//www.svcover.nl/" class="navbar-logo"><img src="//cdl.svcover.nl/dist/v0.1/img/cover.png" alt="Cover"></a>
-				<a href="/" class="navbar-brand">Cover Fileman</a>
+				<a href="/" class="navbar-brand">{{title}}</a>
 			</div>
 			<div class="collapse navbar-collapse" id="navbar-main-collapse">
 				<ul class="navbar-right">
 				{% if loggedin %}
 					<li><a href="{{logoutURL}}">Logout</a></li>
 				{% else %}
-                    <li><a href="{{loginURL}}">Login</a></li>
+          <li><a href="{{loginURL}}">Login</a></li>
 				{% endif %}
 				</ul>
 			</div>

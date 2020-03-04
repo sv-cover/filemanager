@@ -150,14 +150,15 @@ function File(filePath, fileSize, modTime, w, h){
       alert(t('E_ActionDisabled'));
       return;
     }
+    var newFullPath = RoxyUtils.MakePath(newPath, this.name);
     var url = RoxyUtils.AddParam(RoxyFilemanConf.COPYFILE, 'f', this.fullPath);
-    url = RoxyUtils.AddParam(url, 'n', newPath);
+    url = RoxyUtils.AddParam(url, 'n', newFullPath);
     var item = this;
     var ret = false;
     $.ajax({
         url: url,
         type: 'POST',
-        data: {f: this.fullPath, n: newPath},
+        data: {f: this.fullPath, n: newFullPath},
         dataType: 'json',
         async:false,
         success: function(data){
@@ -185,7 +186,7 @@ function File(filePath, fileSize, modTime, w, h){
       alert(t('E_ActionDisabled'));
       return;
     }
-    newFullPath = RoxyUtils.MakePath(newPath, this.name);
+    var newFullPath = RoxyUtils.MakePath(newPath, this.name);
     var url = RoxyUtils.AddParam(RoxyFilemanConf.MOVEFILE, 'f', this.fullPath);
     url = RoxyUtils.AddParam(url, 'n', newFullPath);
     var item = this;

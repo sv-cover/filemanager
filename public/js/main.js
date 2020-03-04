@@ -354,8 +354,9 @@ function renameFile(){
 }
 function getSelectedFile(){
   var ret = null;
-  if($('#pnlFileList .selected').length > 0)
-    ret = new File($('#pnlFileList .selected').attr('data-path'));
+  var selected = $('#pnlFileList .selected');
+  if(selected.length > 0)
+    ret = new File(selected.attr('data-path'), selected.attr('data-size'), selected.attr('data-time'), selected.attr('data-w'), selected.attr('data-h'));
   return ret;
 }
 function getSelectedDir(){
@@ -385,7 +386,30 @@ function deleteFile(){
 function previewFile(){
   var f = getSelectedFile();
   if(f){
-    window.open(f.fullPath);
+    clickFirstOnEnter('dlgPreview');
+    var dlg = $('#dlgPreview');
+    var height = $(window).height() - 50;
+    var width = $(window).width() - 50;
+    dlg.empty();
+    if (f.IsImage()) {
+      var ratio = (width - 24) / parseInt(f.width);
+      height = Math.min(parseInt(f.height) * ratio + 50, height);
+      dlg.append('<img src="' + f.fullPath + '"></img>');
+    } else {
+      dlg.append('<iframe src="' + f.fullPath + '"></img>');
+    }
+    dlg.dialog({
+      title: f.fullPath,
+      modal: true,
+      draggable: false,
+      height: height,
+      width: width,
+      position: { my: "center", at: "top", of: window },
+      open: function() {},
+      close: function() {
+        dlg.empty();
+      }
+    });
   }
 }
 function downloadFile(){
@@ -430,8 +454,8 @@ function tooltipContent(){
   else if(f.IsImage()){
     if(RoxyFilemanConf.GENERATETHUMB){
       imgUrl = RoxyUtils.AddParam(RoxyFilemanConf.GENERATETHUMB, 'f', f.fullPath);
-      imgUrl = RoxyUtils.AddParam(imgUrl, 'width', RoxyFilemanConf.PREVIEW_THUMB_WIDTH);
-      imgUrl = RoxyUtils.AddParam(imgUrl, 'height', RoxyFilemanConf.PREVIEW_THUMB_HEIGHT);
+      imgUrl = RoxyUtils.AddParam(imgUrl, 'w', RoxyFilemanConf.PREVIEW_THUMB_WIDTH);
+      imgUrl = RoxyUtils.AddParam(imgUrl, 'h', RoxyFilemanConf.PREVIEW_THUMB_HEIGHT);
     }
     else
       imgUrl = f.fullPath;
@@ -499,8 +523,8 @@ function switchView(t){
       var imgUrl = $(this).attr('data-icon-big');
       if(RoxyFilemanConf.GENERATETHUMB && RoxyUtils.IsImage($(this).attr('data-path'))){
         imgUrl = RoxyUtils.AddParam(RoxyFilemanConf.GENERATETHUMB, 'f', imgUrl);
-        imgUrl = RoxyUtils.AddParam(imgUrl, 'width', RoxyFilemanConf.THUMBS_VIEW_WIDTH);
-        imgUrl = RoxyUtils.AddParam(imgUrl, 'height', RoxyFilemanConf.THUMBS_VIEW_HEIGHT);
+        imgUrl = RoxyUtils.AddParam(imgUrl, 'w', RoxyFilemanConf.THUMBS_VIEW_WIDTH);
+        imgUrl = RoxyUtils.AddParam(imgUrl, 'h', RoxyFilemanConf.THUMBS_VIEW_HEIGHT);
       }
       $(this).children('.icon').css('background-image', 'url('+imgUrl+')');
       $(this).tooltip('option', 'show', {delay:50});
@@ -668,7 +692,7 @@ function removeDisabledActions(){
   }
 }
 function getPreselectedFile(){
-  var filePath = RoxyUtils.GetUrlParam('selected');
+  var filePath = decodeURIComponent(RoxyUtils.GetUrlParam('selected'));
   if(!filePath){
     switch(getFilemanIntegration()){
       case 'ckeditor':
@@ -739,59 +763,68 @@ function initSelection(filePath){
   if(!hasSelection)
     selectFirst();
 }
+function removeSelect() {
+  var select = RoxyUtils.GetUrlParam('select');
+  if (select && select === 'false') {
+    $('#mnuSelectFile').next().remove();
+    $('#mnuSelectFile').remove();
+    $('#btnSelectFile').remove();
+  }
+}
 $(function(){
   RoxyUtils.LoadConfig();
-  var d = new Directory();
-  d.LoadAll();
-  $('#wraper').show();
-  
-  window.setTimeout('initSelection()', 100);
-
-  RoxyUtils.Translate();
-  $('body').click(function(){
-    closeMenus();
-  });
-  
-  var viewType = RoxyUtils.GetCookie('roxyview');
-  if(!viewType)
-    viewType = RoxyFilemanConf.DEFAULTVIEW;
-  if(viewType)
-    switchView(viewType);
+    var d = new Directory();
+    d.LoadAll();
+    $('#wraper').show();
     
-  ResizeLists();
-  $(".actions input").tooltip({track: true});
-  $( window ).resize(ResizeLists);
+    window.setTimeout('initSelection()', 100);
   
-  document.oncontextmenu = function() {return false;};
-  removeDisabledActions();
-  $('#copyYear').html(new Date().getFullYear());
-  if(RoxyFilemanConf.UPLOAD && RoxyFilemanConf.UPLOAD != ''){
-    var dropZone = document.getElementById('fileActions');
-    dropZone.ondragover = function () { return false; };
-    dropZone.ondragend = function () { return false; };
-    dropZone.ondrop = function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropFiles(e);
-    };
+    RoxyUtils.Translate();
+    $('body').click(function(){
+      closeMenus();
+    });
     
-    dropZone = document.getElementById('dlgAddFile');
-    dropZone.ondragover = function () { return false; };
-    dropZone.ondragend = function () { return false; };
-    dropZone.ondrop = function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropFiles(e, true);
-    };
-  }
-  
-  if(getFilemanIntegration() == 'tinymce3'){
-    try {
-      $('body').append('<script src="js/tiny_mce_popup.js"><\/script>');
+    var viewType = RoxyUtils.GetCookie('roxyview');
+    if(!viewType)
+      viewType = RoxyFilemanConf.DEFAULTVIEW;
+    if(viewType)
+      switchView(viewType);
+      
+    ResizeLists();
+    $(".actions input").tooltip({track: true});
+    $( window ).resize(ResizeLists);
+    
+    document.oncontextmenu = function() {return false;};
+    removeDisabledActions();
+    removeSelect();
+    $('#copyYear').html(new Date().getFullYear());
+    if(RoxyFilemanConf.UPLOAD && RoxyFilemanConf.UPLOAD != ''){
+      var dropZone = document.getElementById('fileActions');
+      dropZone.ondragover = function () { return false; };
+      dropZone.ondragend = function () { return false; };
+      dropZone.ondrop = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropFiles(e);
+      };
+      
+      dropZone = document.getElementById('dlgAddFile');
+      dropZone.ondragover = function () { return false; };
+      dropZone.ondragend = function () { return false; };
+      dropZone.ondrop = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropFiles(e, true);
+      };
     }
-    catch(ex){}
-  }
-});
+    
+    if(getFilemanIntegration() == 'tinymce3'){
+      try {
+        $('body').append('<script src="js/tiny_mce_popup.js"><\/script>');
+      }
+      catch(ex){}
+    }
+  });
 function getFilemanIntegration(){
   var integration = RoxyUtils.GetUrlParam('integration');
   if(!integration)
