@@ -52,7 +52,7 @@ const cache = function(options = {}) {
         
         res.on('finish', function () {
           if (isResponseUncacheable(options, res)) {
-            console.warn('Error in response, response deleted from cache.');
+            console.warn('Error in response, response deleted from cache.' + key);
             cache.del(key);
           }
         });

@@ -7,6 +7,7 @@ const config = { ...{
     'UPLOADS_FOLDER': 'uploads',
     'ADMINS': ['nico@svcover.nl'],
     'ADMIN_COMMITTEES': ['board'],
+    'TMP_FOLDER': '/tmp',
     /* Images */
     "MAX_IMAGE_WIDTH": "2000",
     "MAX_IMAGE_HEIGHT": "2000",
