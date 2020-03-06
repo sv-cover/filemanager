@@ -396,10 +396,11 @@ function previewFile(){
       height = Math.min(parseInt(f.height) * ratio + 50, height);
       dlg.append('<img src="' + f.fullPath + '"></img>');
     } else {
-      dlg.append('<iframe src="' + f.fullPath + '"></img>');
+      dlg.append('<iframe src="' + f.fullPath + '"></iframe>');
     }
+    console.log(window.location.href);
     dlg.dialog({
-      title: f.fullPath,
+      title: RoxyUtils.MakePath(window.location.host, f.fullPath),
       modal: true,
       draggable: false,
       height: height,
