@@ -11,6 +11,7 @@ const config = { ...{
     /* Images */
     "MAX_IMAGE_WIDTH": "2000",
     "MAX_IMAGE_HEIGHT": "2000",
+    "TRANSCODING_PROCESSES": 1,
     /* Caching */
     'CACHE_USE': true,
     'CACHE_MAX_SIZE': 100*1024*1024, /* In bytes. */
