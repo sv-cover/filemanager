@@ -56,29 +56,4 @@ utils.fileFolderAccess = function(session, p) {
   return response;
 };
 
-// Returns a promise that tries to open path p in graphics magick.
-utils.imageOpen = function(p) {
-  return new Promise((resolve, reject) => {
-    try {
-      let image = gm(p);
-      image.identify(function(err, value) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(image);
-        }
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// Sends an gm image object by converting it into a stream.
-utils.imageSend = function(res, image) {
-  res.setHeader('content-type', 'image/' + image.format().data.format);
-  var stream = image.stream();
-  stream.pipe(res);
-};
-
 module.exports = utils;
