@@ -1,4 +1,4 @@
-const coverapi = require('./coverapi');
+const secrets = require('./secrets');
 const fileman = require('./fileman');
 
 const config = { ...{
@@ -12,6 +12,9 @@ const config = { ...{
     "MAX_IMAGE_WIDTH": "2000",
     "MAX_IMAGE_HEIGHT": "2000",
     "TRANSCODING_PROCESSES": 1,
+    'REDIS_HOST': 'host.docker.internal',
+    'REDIS_PORT': '6379',
+    'REDIS_DB': '0',
     /* Caching */
     'CACHE_USE': true,
     'CACHE_MAX_SIZE': 100*1024*1024, /* In bytes. */
@@ -22,6 +25,6 @@ const config = { ...{
     'COVER_LOGOUT_URL': 'http://localhost:8080/api.php?view=logout',
     'COVER_COOKIE': 'cover_session_id',
     'COVER_API_APP': 'test-app',
-}, ...coverapi, ...fileman }
+}, ...secrets, ...fileman }
 
 module.exports = config;

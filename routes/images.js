@@ -7,7 +7,12 @@ const cache = require('../cache');
 const config = require('../config');
 
 const serverRoot = path.join('.', config.SERVER_ROOT);
-const imageQueue = new Bull('image transcoding', 'redis://host.docker.internal:6379');
+const imageQueue = new Bull('image transcoding', {redis: {
+  port: config.REDIS_PORT,
+  host: config.REDIS_HOST,
+  db: config.REDIS_DB,
+  password: config.REDIS_PASSWORD
+}});
 
 // Checks if graphics magick is installed.
 router.use('/', function(req, res, next) {
