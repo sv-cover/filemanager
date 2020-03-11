@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 const gm = require('gm');
 const cache = require('../cache');
 const config = require('../config');
 const jobQueue = require('./jobQueue');
+
+const serverRoot = path.join('.', config.SERVER_ROOT);
 
 // Checks if graphics magick is installed.
 router.use('/', function(req, res, next) {
@@ -26,7 +29,8 @@ function imageSend(res) {
 };
 
 function addToQueue(res, method, query) {
-  jobQueue.addJobToQueue(method, query).then(imageSend(res)).catch((err) => {
+  const filePath = path.join(serverRoot, query.f);
+  jobQueue.addJobToQueue(method, filePath, query).then(imageSend(res)).catch((err) => {
     console.warn(err);
     res.status(400).send('Failed to start image process job');
   });

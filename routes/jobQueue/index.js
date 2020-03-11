@@ -1,9 +1,7 @@
-const path = require('path');
 const Bull = require('bull');
 const gm = require('gm');
 const config = require('../../config');
 
-const serverRoot = path.join('.', config.SERVER_ROOT);
 const imageQueue = new Bull('image transcoding', {redis: {
   port: config.REDIS_PORT,
   host: config.REDIS_HOST,
@@ -22,7 +20,7 @@ function imageOpen(p) {
         if (err) {
           reject(err);
         } else {
-          resolve({image: image, format: value.format});
+          resolve({image: image, format: value.format, size: value.size});
         }
       });
     } catch (error) {
@@ -41,10 +39,17 @@ function generatethumb(image, query) {
     .crop(query.w || '200', query.h || '200');
 }
 
+function maxSize(file) {
+  if(file.size.width > config.MAX_IMAGE_WIDTH || file.size.height > config.MAX_IMAGE_HEIGHT) {
+    return file.image.resize(config.MAX_IMAGE_WIDTH, config.MAX_IMAGE_HEIGHT);
+  } 
+  return file.image
+}
+
 async function processImage(job, done) {
   const query = job.data.query;
   const method = job.data.method;
-  const filepath = path.join(serverRoot, query.f)
+  const filepath = job.data.filepath;
 
   imageOpen(filepath).then((file) => {
     switch (method) {
@@ -53,6 +58,9 @@ async function processImage(job, done) {
         break;
       case 'generatethumb':
         file.image = generatethumb(file.image, query);
+        break;
+      case 'maxSize':
+        file.image = maxSize(file);
         break;
     }
     file.image.toBuffer((err, buffer) => {
@@ -67,13 +75,12 @@ async function processImage(job, done) {
 
 imageQueue.process('processImage', config.TRANSCODING_PROCESSES, processImage);
 
-function addJobToQueue(method, query) {
+function addJobToQueue(method, filepath, query) {
   return new Promise(function(resolve, reject) {
-    imageQueue.add('processImage', {method: method, query: query}).then((job) => {
+    imageQueue.add('processImage', {method: method, filepath: filepath, query: query}).then((job) => {
       job.finished().then((jobID) => {
         const result = results[jobID];
         delete results[jobID];
-        console.log(results);
         resolve(result);
       }).catch(reject);
     }).catch(reject);

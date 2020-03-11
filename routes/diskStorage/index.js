@@ -2,6 +2,7 @@ var fs = require('fs')
 var path = require('path')
 const gm = require('gm');
 const config = require('../../config');
+const jobQueue = require('../jobQueue');
 
 /* 
 Replace the _handlefile function of multer diskStorage with this function.
@@ -26,13 +27,8 @@ const handleFile = function(req, file, cb) {
         file.stream.pipe(outTmpStream);
         outTmpStream.on('error', cb);
         outTmpStream.on('finish', function () {
-          gm(tmpPath).size(function(err, size) {
-            if(err) cb(err);
-            let image = this;
-            if(size.width > config.MAX_IMAGE_WIDTH || size.height > config.MAX_IMAGE_HEIGHT) {
-              image = this.resize(config.MAX_IMAGE_WIDTH, config.MAX_IMAGE_HEIGHT);
-            }
-            image.write(finalPath, function(err) {
+          jobQueue.addJobToQueue('maxSize', tmpPath, null).then((result) => {
+            gm(result.image).write(finalPath, (err) => {
               if(err) cb(err);
               cb(null, {
                 destination: destination,
@@ -40,7 +36,7 @@ const handleFile = function(req, file, cb) {
                 path: finalPath
               });
             });
-          });
+          }).catch(cb);
         });
       } else {
         let outStream = fs.createWriteStream(finalPath);
