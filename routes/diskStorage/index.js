@@ -28,12 +28,15 @@ const handleFile = function(req, file, cb) {
         outTmpStream.on('error', cb);
         outTmpStream.on('finish', function () {
           jobQueue.addJobToQueue('maxSize', tmpPath, null).then((result) => {
-            gm(result.image).write(finalPath, (err) => {
-              if(err) cb(err);
-              cb(null, {
-                destination: destination,
-                filename: filename,
-                path: finalPath
+            fs.unlink(tmpPath, (err) => {
+              if (err) cb(err);
+              gm(result.image).write(finalPath, (err) => {
+                if (err) cb(err);
+                cb(null, {
+                  destination: destination,
+                  filename: filename,
+                  path: finalPath
+                });
               });
             });
           }).catch(cb);
