@@ -9,8 +9,8 @@ const config = { ...{
     'ADMIN_COMMITTEES': ['board'],
     'TMP_FOLDER': '/tmp',
     /* Images */
-    "MAX_IMAGE_WIDTH": "2000",
-    "MAX_IMAGE_HEIGHT": "2000",
+    "MAX_IMAGE_WIDTH": 0,
+    "MAX_IMAGE_HEIGHT": 0,
     "TRANSCODING_PROCESSES": 1,
     'REDIS_HOST': 'host.docker.internal',
     'REDIS_PORT': '6379',
