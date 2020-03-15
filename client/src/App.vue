@@ -1,28 +1,59 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Menu />
+    <section class="section main">
+      <b-loading :is-full-page="false" :active.sync="hasLoadedConfig">
+      </b-loading>
+      <div class="columns">
+        <div class="column is-one-fifth">
+          <FolderTree/>
+        </div>
+        <div class="column">
+          Files
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { mapGetters } from 'vuex'
+
+import Menu from "./components/menu/TopMenu.vue"
+import FolderTree from "./components/FolderTree.vue"
 
 export default {
-  name: 'App',
+  name: "Fileman",
   components: {
-    HelloWorld
+    Menu,
+    FolderTree
+  },
+  computed: {
+    isLoadingConfig () {
+      return !this.$store.getters.hasLoadedConfig
+    }
+  },
+  created () {
+    this.$store.dispatch('loadConfig')
   }
-}
+};
 </script>
 
 <style lang="scss">
+// Import Bulma's core
+@import "~bulma/sass/utilities/_all";
+@import "./styles/bulmaVariables.scss";
+
+// Import Bulma and Buefy styles
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  display: flex;
+  flex-flow: column;
+  height: 100vh;
+}
+.section.main {
+  flex-grow: 1;
 }
 </style>

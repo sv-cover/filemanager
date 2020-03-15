@@ -201,11 +201,12 @@ router.post('/upload', function(req, res) {
   })  
 });
 
-var getDirectories = function(srcpath, response) {
-  var info = {
+const getDirectories = function(srcpath, response) {
+  const info = {
     p: srcpath.replace(/\\/g, '/'),
     f: 0,
-    d: 0
+    d: 0,
+    list: []
   };
   response.push(info);
   
@@ -213,7 +214,7 @@ var getDirectories = function(srcpath, response) {
     var pathDir = path.join(srcpath, file);
     if(fs.statSync(path.join(serverRoot, pathDir)).isDirectory()){
         info.d++;
-        getDirectories(pathDir, response);
+        getDirectories(pathDir, info);
     }else{
         info.f++;
     }
