@@ -206,7 +206,7 @@ const getDirectories = function(srcpath, response) {
     p: srcpath.replace(/\\/g, '/'),
     f: 0,
     d: 0,
-    list: []
+    c: []
   };
   response.push(info);
   
@@ -214,7 +214,7 @@ const getDirectories = function(srcpath, response) {
     var pathDir = path.join(srcpath, file);
     if(fs.statSync(path.join(serverRoot, pathDir)).isDirectory()){
         info.d++;
-        getDirectories(pathDir, info);
+        getDirectories(pathDir, info.c);
     }else{
         info.f++;
     }

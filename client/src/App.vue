@@ -2,14 +2,11 @@
   <div id="app">
     <Menu />
     <section class="section main">
-      <b-loading :is-full-page="false" :active.sync="hasLoadedConfig">
+      <b-loading :is-full-page="false" :active="isLoadingConfig">
       </b-loading>
-      <div class="columns">
-        <div class="column is-one-fifth">
-          <FolderTree/>
-        </div>
-        <div class="column">
-          Files
+      <div v-if="hasLoadedConfig" class="mainView">
+        <div class="box folder">
+          <Folders :folders="directories" :currentFolder="currentDirectory" v-on:update:currentFolder="changeCurrentFolder"></Folders>
         </div>
       </div>
     </section>
@@ -17,24 +14,44 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState,  mapGetters, mapMutations } from 'vuex'
+import { errorToast } from "./utils";
 
 import Menu from "./components/menu/TopMenu.vue"
-import FolderTree from "./components/FolderTree.vue"
+import Folders from "./components/Folders"
 
 export default {
   name: "Fileman",
   components: {
     Menu,
-    FolderTree
+    Folders
   },
   computed: {
+    ...mapState({
+      directories: state => state.dir.listDirectories,
+      currentDirectory: state => state.dir.currentDirectory
+    }),
+    ...mapGetters([
+      'hasLoadedConfig'
+    ]),
     isLoadingConfig () {
       return !this.$store.getters.hasLoadedConfig
     }
   },
-  created () {
-    this.$store.dispatch('loadConfig')
+  methods: {
+    ...mapMutations({
+      setCurrentFolder: 'SET_CURRENT_DIR'
+    }),
+    changeCurrentFolder: function (event) {
+      this.setCurrentFolder(event.p)
+    }
+  },
+  mounted () {
+    this.$store.dispatch('loadConfig').then( (msg) => {
+      if (msg === 'success') {
+        this.$store.dispatch('loadDirList')
+      }
+    }).catch(errorToast)
   }
 };
 </script>
@@ -54,6 +71,21 @@ export default {
   height: 100vh;
 }
 .section.main {
+  flex-grow: 1;
+}
+.mainView {
+  width: 100%;
+  height: 100%;
+}
+.folder {
+  height: 100%;
+  width: 15%;
+  overflow-x: scroll;
+  padding: 1.0rem;
+  white-space: nowrap;
+}
+.files {
+  height: 100%;
   flex-grow: 1;
 }
 </style>

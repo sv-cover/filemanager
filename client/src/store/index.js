@@ -7,7 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
-    directory: directory,
+    dir: directory,
     ui: ui
   }
 })

@@ -1,8 +1,8 @@
 <template>
   <b-navbar>
+    <Menu />
     <template slot="start">
       <b-navbar-dropdown label="Files">
-        <FileMenu />
       </b-navbar-dropdown>
 
       <b-navbar-item tag="div">
@@ -27,7 +27,6 @@
             type="search"
             icon="magnify"
             icon-clickable
-            @icon-click="searchIconClick"
           >
           </b-input>
         </b-field>

@@ -1,4 +1,3 @@
-import { errorToast } from "../../utils";
 import api from "../api";
 import { SET_CONFIG } from "../mutation-types";
 
@@ -13,17 +12,20 @@ export default {
   },
   getters: {
     hasLoadedConfig: state => {
-      return state.config !== null
+      return state.config !== null;
     }
   },
   actions: {
     loadConfig(context) {
-      return api
-        .getConfig()
-        .then(config => {
-          context.commit(SET_CONFIG, config);
-        })
-        .catch(errorToast);
+      return new Promise((resolve, reject) => {
+        api
+          .getConfig()
+          .then(config => {
+            context.commit(SET_CONFIG, config);
+            resolve("success");
+          })
+          .catch(reject);
+      });
     }
   },
   modules: {}
