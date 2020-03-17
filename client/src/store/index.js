@@ -1,13 +1,15 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import directory from './modules/directory'
-import ui from './modules/ui'
+import Vue from "vue";
+import Vuex from "vuex";
+import ui from "./modules/ui";
+import dir from "./modules/directory";
+import files from "./modules/files";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   modules: {
-    dir: directory,
-    ui: ui
+    ui: ui,
+    dir: dir,
+    files: files
   }
-})
+});

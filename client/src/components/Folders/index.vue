@@ -4,6 +4,7 @@
       Folders
     </p>
     <ul class="menu-list is-size-7">
+      <li><b-progress v-if="loading" /></li>
       <Folder v-for="(folder, index) in folders" :key="index" :folder="folder" :currentFolder="currentFolder" v-on:update:currentFolder="setCurrentFolder" />
     </ul>
   </aside>
@@ -19,7 +20,8 @@ export default {
   },
   props: {
     folders: Array,
-    currentFolder: String
+    currentFolder: String,
+    loading: Boolean
   },
   methods: {
     setCurrentFolder: function (event) {

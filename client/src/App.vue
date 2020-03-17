@@ -2,14 +2,18 @@
   <div id="app">
     <TopMenu />
     <section class="section main">
-      <b-loading :is-full-page="false" :active="isLoadingConfig">
-      </b-loading>
+      <b-loading :active="isLoadingConfig" />
       <div v-if="hasLoadedConfig" class="mainView">
         <div class="folder has-background-light">
-          <Folders :folders="directories" :currentFolder="currentDirectory" v-on:update:currentFolder="changeCurrentFolder"></Folders>
+          <Folders
+            :folders="directories"
+            :currentFolder="currentDirectory"
+            v-on:update:currentFolder="setCurrentFolder"
+            :loading="isLoadingDirList"
+          />
         </div>
         <div class="files ">
-          <FilesDetails/>
+          <FilesDetails :data="filesList" />
         </div>
       </div>
     </section>
@@ -17,12 +21,12 @@
 </template>
 
 <script>
-import { mapState,  mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters, mapActions } from "vuex";
 import { errorToast } from "./utils";
 
-import TopMenu from "./components/menu/TopMenu.vue"
-import Folders from "./components/Folders"
-import FilesDetails from "./components/FilesDetails.vue"
+import TopMenu from "./components/menu/TopMenu.vue";
+import Folders from "./components/Folders";
+import FilesDetails from "./components/FilesDetails.vue";
 
 export default {
   name: "Fileman",
@@ -34,29 +38,22 @@ export default {
   computed: {
     ...mapState({
       directories: state => state.dir.listDirectories,
-      currentDirectory: state => state.dir.currentDirectory
+      currentDirectory: state => state.dir.currentDirectory,
+      isLoadingDirList: state => state.dir.isLoading,
+      filesList: state => state.files.listFiles
     }),
-    ...mapGetters([
-      'hasLoadedConfig'
-    ]),
-    isLoadingConfig () {
-      return !this.$store.getters.hasLoadedConfig
+    ...mapGetters(["isLoadingConfig"]),
+    hasLoadedConfig() {
+      return !this.$store.getters.isLoadingConfig;
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrentFolder: 'SET_CURRENT_DIR'
-    }),
-    changeCurrentFolder: function (event) {
-      this.setCurrentFolder(event.p)
-    }
+    ...mapActions({
+      setCurrentFolder: 'setCurrentDir'
+    })
   },
-  mounted () {
-    this.$store.dispatch('loadConfig').then( (msg) => {
-      if (msg === 'success') {
-        this.$store.dispatch('loadDirList')
-      }
-    }).catch(errorToast)
+  mounted() {
+    this.$store.dispatch("loadConfig").catch(errorToast);
   }
 };
 </script>
@@ -82,14 +79,14 @@ export default {
 .mainView {
   width: 100%;
   height: 100%;
-  display: -webkit-flex; 
+  display: -webkit-flex;
   display: flex;
 }
 .folder {
   height: 100%;
   width: 20%;
   overflow-x: scroll;
-  padding: 1.0rem;
+  padding: 1rem;
   white-space: nowrap;
 }
 .files {

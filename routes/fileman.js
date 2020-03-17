@@ -40,7 +40,7 @@ function nAccessControl(req, res, next) {
 }
 
 // Adds the fDAccessControl middleware to all routes in fileman.js except for dirlist and upload
-router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
+//router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
 
 /* 
 Return the directory tree.

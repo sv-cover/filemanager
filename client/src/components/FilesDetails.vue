@@ -34,25 +34,8 @@ import { basename } from "path";
 
 export default {
   name: "FileDetails",
-  data() {
-    return {
-      data: [
-        {
-          p: "uploads/audicee/DSC_0174.JPG",
-          s: 14638239,
-          t: 1583931228,
-          w: 6000,
-          h: 4000
-        },
-        {
-          p: "uploads/audicee/DSC_0187.JPG",
-          s: 14952612,
-          t: 1583931225,
-          w: 6000,
-          h: 4000
-        }
-      ]
-    };
+  props: {
+    data: Array
   },
   methods: {
     convertPathToName: function(path) {
@@ -65,7 +48,6 @@ export default {
       const byteUnits = ['B', 'kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
       let i = 0;
       for (i = 0; i < byteUnits.length; i++) {
-        console.log(sizeInBytes)
         if (sizeInBytes < 1024) break;
         sizeInBytes = sizeInBytes / 1024;
       }

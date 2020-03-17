@@ -1,4 +1,8 @@
-export const SET_CONFIG = 'SET_CONFIG'
+export const SET_CONFIG = "SET_CONFIG";
 
-export const SET_DIRLIST = 'SET_DIRLIST'
-export const SET_CURRENT_DIR = 'SET_CURRENT_DIR'
+export const SET_DIRLIST = "SET_DIRLIST";
+export const SET_CURRENT_DIR = "SET_CURRENT_DIR";
+export const SET_DIRLIST_LOADING = "SET_DIRLIST_LOADING";
+
+export const SET_FILESLIST = "SET_FILESLIST";
+export const SET_FILESLIST_LOADING = "SET_FILESLIST_LOADING";

@@ -11,8 +11,8 @@ export default {
     }
   },
   getters: {
-    hasLoadedConfig: state => {
-      return state.config !== null;
+    isLoadingConfig: state => {
+      return state.config === null;
     }
   },
   actions: {
@@ -22,11 +22,11 @@ export default {
           .getConfig()
           .then(config => {
             context.commit(SET_CONFIG, config);
+            context.dispatch("loadDirList");
             resolve("success");
           })
           .catch(reject);
       });
     }
-  },
-  modules: {}
+  }
 };
