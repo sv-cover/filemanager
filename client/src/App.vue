@@ -1,12 +1,15 @@
 <template>
   <div id="app">
-    <Menu />
+    <TopMenu />
     <section class="section main">
       <b-loading :is-full-page="false" :active="isLoadingConfig">
       </b-loading>
       <div v-if="hasLoadedConfig" class="mainView">
-        <div class="box folder">
+        <div class="folder has-background-light">
           <Folders :folders="directories" :currentFolder="currentDirectory" v-on:update:currentFolder="changeCurrentFolder"></Folders>
+        </div>
+        <div class="files ">
+          <FilesDetails/>
         </div>
       </div>
     </section>
@@ -17,14 +20,16 @@
 import { mapState,  mapGetters, mapMutations } from 'vuex'
 import { errorToast } from "./utils";
 
-import Menu from "./components/menu/TopMenu.vue"
+import TopMenu from "./components/menu/TopMenu.vue"
 import Folders from "./components/Folders"
+import FilesDetails from "./components/FilesDetails.vue"
 
 export default {
   name: "Fileman",
   components: {
-    Menu,
-    Folders
+    TopMenu,
+    Folders,
+    FilesDetails
   },
   computed: {
     ...mapState({
@@ -72,14 +77,17 @@ export default {
 }
 .section.main {
   flex-grow: 1;
+  padding: 0;
 }
 .mainView {
   width: 100%;
   height: 100%;
+  display: -webkit-flex; 
+  display: flex;
 }
 .folder {
   height: 100%;
-  width: 15%;
+  width: 20%;
   overflow-x: scroll;
   padding: 1.0rem;
   white-space: nowrap;

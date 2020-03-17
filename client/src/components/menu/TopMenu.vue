@@ -1,63 +1,71 @@
 <template>
-  <b-navbar>
-    <Menu />
-    <template slot="start">
-      <b-navbar-dropdown label="Files">
-      </b-navbar-dropdown>
+  <section class="topmenu has-background-grey-dark">
+    <b-field grouped>
+      <b-field>
+        <b-dropdown aria-role="list">
+            <button class="button" slot="trigger" slot-scope="{ active }">
+                <span>Files</span>
+                <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+            </button>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="monitor"/> Preview</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="download"/> Download</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="folder-plus"/> New Folder</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="content-cut"/> Cut</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="content-copy"/> Copy</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="content-paste"/> Paste</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="delete"/> Delete</b-dropdown-item>
+            <b-dropdown-item aria-role="listitem"><b-icon icon="pencil"/> Rename</b-dropdown-item>
+        </b-dropdown>
+      </b-field>
 
-      <b-navbar-item tag="div">
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-          <ul>
-            <li><a href="#">Bulma</a></li>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">Components</a></li>
-            <li class="is-active">
-              <a href="#" aria-current="page">Breadcrumb</a>
-            </li>
-          </ul>
-        </nav>
-      </b-navbar-item>
-    </template>
+      <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+          <li><a href="#">Place</a></li>
+          <li><a href="#">Holder</a></li>
+          <li class="is-active">
+            <a href="#" aria-current="page">Breadcrumb</a>
+          </li>
+        </ul>
+      </nav>
 
-    <template slot="end">
-      <b-navbar-item tag="div">
+      <b-field grouped position="is-right" expanded>
         <b-field>
-          <b-input
-            placeholder="Search..."
-            type="search"
-            icon="magnify"
-            icon-clickable
-          >
-          </b-input>
+          <b-button icon-left="magnify"></b-button>
         </b-field>
-      </b-navbar-item>
 
-      <b-navbar-item tag="div">
         <b-field>
-          <b-select placeholder="Select a name">
-            <option value="name-asc"> ↑ A-Z</option>
-            <option value="name-desc"> ↓ Z-A</option>
-          </b-select>
+          <b-dropdown position="is-bottom-left" aria-role="list">
+              <button class="button" slot="trigger" slot-scope="{ active }">
+                  <b-icon icon="sort-ascending"></b-icon>
+                  <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+              </button>
+              <b-dropdown-item aria-role="listitem"><b-icon icon="sort-ascending"/> A-Z</b-dropdown-item>
+              <b-dropdown-item aria-role="listitem"><b-icon icon="sort-descending"/> Z-A</b-dropdown-item>
+          </b-dropdown>
         </b-field>
-      </b-navbar-item>
 
-      <b-navbar-item tag="div">
         <b-field>
-          <b-select placeholder="Select a view">
-            <option value="details"> Details</option>
-            <option value="thumbnails"> Thumbnails</option>
-          </b-select>
+          <b-dropdown position="is-bottom-left" aria-role="list">
+              <button size="is-small" class="button" slot="trigger" slot-scope="{ active }">
+                  <b-icon icon="format-list-bulleted"></b-icon>
+                  <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+              </button>
+              <b-dropdown-item aria-role="listitem"><b-icon icon="format-list-bulleted"/> Details</b-dropdown-item>
+              <b-dropdown-item aria-role="listitem"><b-icon icon="file-image"/> Thumbnails</b-dropdown-item>
+          </b-dropdown>
         </b-field>
-      </b-navbar-item>
-    </template>
-  </b-navbar>
+        </b-field>
+      </b-field>
+      
+    </b-field>
+  </section>
 </template>
 
 <script>
 import FileMenu from "./FileMenu.vue";
 
 export default {
-  name: "Menu",
+  name: "TopMenu",
   components: {
     FileMenu
   },
@@ -97,4 +105,10 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.box:not(:last-child).topmenu,
+.topmenu {
+  padding: 0.2rem;
+  margin-bottom: 0;
+}
+</style>

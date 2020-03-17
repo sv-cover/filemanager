@@ -3,14 +3,14 @@
     <p class="menu-label">
       Folders
     </p>
-    <ul class="menu-list">
+    <ul class="menu-list is-size-7">
       <Folder v-for="(folder, index) in folders" :key="index" :folder="folder" :currentFolder="currentFolder" v-on:update:currentFolder="setCurrentFolder" />
     </ul>
   </aside>
 </template>
 
 <script>
-import Folder from './folder'
+import Folder from './Folder'
 
 export default {
   name: 'Folders',
