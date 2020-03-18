@@ -3,7 +3,7 @@
     <a :class="isActive ? 'is-active' : ''" v-on:click="clickFolder">
       <b-icon
         size="is-small"
-        :icon="isExpanded ? 'folder-open' : 'folder'"
+        :icon="getIcon"
       ></b-icon>
       {{ getName + " (" + folder.f + ")" }}
     </a>
@@ -41,7 +41,11 @@ export default {
       return (this.folder.d > 0) & this.expanded;
     },
     getName: function() {
-      return basename(this.folder.p)
+      return basename(this.folder.p);
+    },
+    getIcon: function() {
+      if (this.isExpanded) return "folder-open";
+      return this.folder.d > 0 ? "folder-multiple" : "folder";
     }
   },
   methods: {

@@ -32,8 +32,6 @@ function fetchData(url, method = "POST", body = null, expectJSON = true) {
     headers: headers
   };
 
-  console.log(body)
-
   if (body) init["body"] = JSON.stringify(body);
 
   return fetch(url, init).then(response => {

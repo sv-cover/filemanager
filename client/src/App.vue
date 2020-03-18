@@ -3,17 +3,16 @@
     <TopMenu />
     <section class="section main">
       <b-loading :active="isLoadingConfig" />
-      <div v-if="hasLoadedConfig" class="mainView">
+      <div v-if="!isLoadingConfig" class="mainView">
         <div class="folder has-background-light">
           <Folders
             :folders="directories"
-            :currentFolder="currentDirectory"
-            v-on:update:currentFolder="setCurrentFolder"
-            :loading="isLoadingDirList"
+            :currentFolder.sync="currentDirectory"
+            :isLoading="isLoadingDirList"
           />
         </div>
         <div class="files ">
-          <FilesDetails :data="filesList" />
+          <FilesDetails :data="filesList" :isLoading="isLoadingFilesList" @click:file="clickFile" />
         </div>
       </div>
     </section>
@@ -38,19 +37,66 @@ export default {
   computed: {
     ...mapState({
       directories: state => state.dir.listDirectories,
-      currentDirectory: state => state.dir.currentDirectory,
       isLoadingDirList: state => state.dir.isLoading,
-      filesList: state => state.files.listFiles
+      isLoadingFilesList: state => state.files.isLoading
     }),
-    ...mapGetters(["isLoadingConfig"]),
-    hasLoadedConfig() {
-      return !this.$store.getters.isLoadingConfig;
+    ...mapGetters({
+      isLoadingConfig: 'isLoadingConfig'
+    }),
+    filesList: function() {
+      return this.$store.getters.getSortedFilesList();
+    },
+    currentDirectory: {
+      get: function() {
+        return this.$store.state.dir.currentDirectory;
+      },
+      set: function(dir) {
+        this.$store.dispatch('setCurrentDir', dir);
+      }
+    },
+    selectedFiles: {
+      get: function() {
+        return this.$store.getters.getListSelecedFiles();
+      },
+      set: function(selected) {
+        this.$store.dispatch('setSelectedFiles', selected);
+      }
+    },
+    lastSelected: {
+      get: function() {
+        return this.$store.state.files.lastSelected;
+      },
+      set: function(file) {
+        this.$store.dispatch('setLastSelected', file);
+      }
     }
   },
   methods: {
     ...mapActions({
-      setCurrentFolder: 'setCurrentDir'
-    })
+      setCurrentFolderStore: 'setCurrentDir'
+    }),
+    clickFile: function(file, modKey) {
+      const isSelected = this.selectedFiles.findIndex(f => f.index == file.index) >= 0;
+      if (modKey.ctrl && isSelected) {
+        this.$store.dispatch('removeSelectedFile', file);
+      } else {
+        let selected = [file];
+        if (modKey.shift && this.lastSelected) {
+          const indexSelected = this.filesList.findIndex(f => f.index == file.index);
+          const indexLastSelected = this.filesList.findIndex(f => f.index == this.lastSelected.index);
+          const [startIndex, endIndex] = indexSelected > indexLastSelected ? [indexLastSelected, indexSelected] : [indexSelected, indexLastSelected];
+          for (let i = startIndex; i <= endIndex; i++) {
+            selected.push(this.filesList[i]);
+          }
+        }
+        if (modKey.ctrl) {
+          this.$store.dispatch('addSelectedFiles', selected);
+        } else {
+          this.selectedFiles = selected;
+        } 
+        this.lastSelected = file;
+      }
+    }
   },
   mounted() {
     this.$store.dispatch("loadConfig").catch(errorToast);
