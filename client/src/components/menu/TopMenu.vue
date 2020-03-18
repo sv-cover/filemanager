@@ -18,15 +18,7 @@
         </b-dropdown>
       </b-field>
 
-      <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-          <li><a href="#">Place</a></li>
-          <li><a href="#">Holder</a></li>
-          <li class="is-active">
-            <a href="#" aria-current="page">Breadcrumb</a>
-          </li>
-        </ul>
-      </nav>
+      <Breadcrumb :data.sync="newCurrentFolder" />
 
       <b-field grouped position="is-right" expanded>
         <b-field>
@@ -62,43 +54,31 @@
 </template>
 
 <script>
-import FileMenu from "./FileMenu.vue";
+import FileMenu from './FileMenu.vue';
+import Breadcrumb from './Breadcrumb.vue';
 
 export default {
-  name: "TopMenu",
+  name: 'TopMenu',
   components: {
-    FileMenu
+    FileMenu,
+    Breadcrumb
   },
-  data() {
-    return {
-      isActive: true,
-      search: [
-        "Angular",
-        "Angular 2",
-        "Aurelia",
-        "Backbone",
-        "Ember",
-        "jQuery",
-        "Meteor",
-        "Node.js",
-        "Polymer",
-        "React",
-        "RxJS",
-        "Vue.js"
-      ],
-      name: ""
-    };
+  props: {
+    currentFolder: {
+      type: String,
+      default: () => ''
+    },
+    selectedFiles: {
+      type: Array,
+      default: () => []
+    }
   },
   computed: {
-    filteredDataArray() {
-      return this.data.search.filter(option => {
-        return (
-          option
-            .toString()
-            .toLowerCase()
-            .indexOf(this.name.toLowerCase()) >= 0
-        );
-      });
+    newCurrentFolder: {
+      get: vm => vm.currentFolder,
+      set: function(path) {
+        this.$emit('update:currentFolder', path);
+      }
     }
   }
 };

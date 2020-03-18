@@ -53,7 +53,7 @@ export default {
       context.commit(SET_FILESLIST_LOADING, true);
       return new Promise((resolve, reject) => {
         api
-          .getFilesList(dir.p)
+          .getFilesList(dir)
           .then(files => {
             context.commit(SET_FILESLIST, files);
             context.commit(SET_FILESLIST_LOADING, false);

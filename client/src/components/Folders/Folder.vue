@@ -31,14 +31,17 @@ export default {
   },
   props: {
     folder: Object,
-    currentFolder: String
+    currentFolder: {
+      type: String,
+      default: ''
+    }
   },
   computed: {
     isActive: function() {
-      return this.currentFolder === this.folder.p;
+      return (this.currentFolder === this.folder.p);
     },
     isExpanded: function() {
-      return (this.folder.d > 0) & this.expanded;
+      return ((this.folder.d > 0) & this.expanded) || (this.currentFolder.startsWith(this.folder.p));
     },
     getName: function() {
       return basename(this.folder.p);
@@ -57,7 +60,7 @@ export default {
         this.toggleExpanded();
       } else {
         if (!this.expanded) this.expanded = true;
-        this.$emit("update:currentFolder", this.folder);
+        this.$emit("update:currentFolder", this.folder.p);
       }
     },
     setCurrentFolder: function(event) {

@@ -20,8 +20,14 @@ export default {
   },
   props: {
     folders: Array,
-    currentFolder: String,
-    isLoading: Boolean
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    currentFolder: {
+      type: String,
+      default: () => ''
+    }
   },
   methods: {
     setCurrentFolder: function (event) {
