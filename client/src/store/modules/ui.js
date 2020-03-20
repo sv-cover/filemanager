@@ -1,4 +1,5 @@
 import api from "../api";
+import { errorToast } from '../../utils'
 import { SET_CONFIG, SET_VIEW } from "../mutation-types";
 import { VIEW_DETAILS, VIEW_THUMB } from '../view-types';
 
@@ -42,7 +43,10 @@ export default {
             context.dispatch("loadDirList");
             resolve("success");
           })
-          .catch(reject);
+          .catch(err => {
+            errorToast(err, 'UI failed to load.');
+            reject(err);
+          });
       });
     },
     setView(context, view) {

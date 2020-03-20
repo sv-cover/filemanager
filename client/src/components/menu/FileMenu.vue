@@ -1,16 +1,24 @@
 <template>
   <aside class="menu">
     <ul class="menu-list">
-      <FileMenuItem v-for="(o, i) in options" :key="i" :disabled="!o.enabled" :icon="o.icon" @click="o.click()">
-        {{o.label}}
+      <FileMenuItem
+        v-for="(o, i) in options"
+        :key="i"
+        :disabled="!o.enabled"
+        :icon="o.icon"
+        @click="o.click()"
+      >
+        {{ o.label }}
       </FileMenuItem>
     </ul>
   </aside>
 </template>
 
 <script>
-import FileMenuItem from './FileMenuItem';
-import PreviewModal from './PreviewModal'
+import { ToastProgrammatic as Toast } from "buefy";
+
+import FileMenuItem from "./FileMenuItem";
+import PreviewModal from "./PreviewModal";
 
 export default {
   name: "FileMenu",
@@ -23,54 +31,54 @@ export default {
     options: vm => {
       return [
         {
-          label: 'Preview',
-          icon: 'monitor',
+          label: "Preview",
+          icon: "monitor",
           enabled: vm.isOne,
           click: vm.preview
         },
         {
-          label: 'Download',
-          icon: 'download',
+          label: "Download",
+          icon: "download",
           enabled: !vm.isOne,
           click: vm.notImplemented
         },
         {
-          label: 'New Folder',
-          icon: 'folder-plus',
+          label: "New Folder",
+          icon: "folder-plus",
           enabled: vm.isEmpty,
           click: vm.notImplemented
         },
         {
-          label: 'Cut',
-          icon: 'content-cut',
+          label: "Cut",
+          icon: "content-cut",
           enabled: !vm.isEmpty,
           click: vm.notImplemented
         },
         {
-          label: 'Copy',
-          icon: 'content-copy',
+          label: "Copy",
+          icon: "content-copy",
           enabled: !vm.isEmpty,
           click: vm.notImplemented
         },
         {
-          label: 'Paste',
-          icon: 'content-paste',
+          label: "Paste",
+          icon: "content-paste",
           enabled: vm.isEmpty,
           click: vm.notImplemented
         },
         {
-          label: 'Delete',
-          icon: 'delete',
+          label: "Delete",
+          icon: "delete",
           enabled: !vm.isEmpty,
           click: vm.notImplemented
         },
         {
-          label: 'Rename',
-          icon: 'pencil',
+          label: "Rename",
+          icon: "pencil",
           enabled: vm.isOne,
-          click: vm.notImplemented
-        },
-      ]
+          click: vm.rename
+        }
+      ];
     },
     selectedFiles: {
       get: function() {
@@ -96,6 +104,17 @@ export default {
         props: {
           file: this.selectedFiles[0]
         }
+      });
+    },
+    rename: function() {
+      this.$buefy.dialog.prompt({
+        message: `New name for ` + this.selectedFiles[0].name,
+        inputAttrs: {
+          placeholder: "example.png",
+           value: this.selectedFiles[0].name
+        },
+        trapFocus: true,
+        onConfirm: value => this.$store.dispatch('setFileName', {file: this.selectedFiles[0], newName: value})
       });
     }
   }

@@ -28,7 +28,10 @@ export default {
             context.commit(SET_DIRLIST, dirList);
             resolve("success");
           })
-          .catch(reject);
+          .catch(err => {
+            errorToast(err, 'Directory tree failed to load.');
+            reject(err);
+          });
       });
     },
     setCurrentDir(context, dir) {

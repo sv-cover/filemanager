@@ -1,4 +1,5 @@
 import { ToastProgrammatic as Toast } from "buefy";
+import path from 'path';
 
 export function APIError({ message, url, status, response }) {
   this.name = "APIError";
@@ -55,10 +56,11 @@ export function fetchData(url, method = "POST", body = null, expectJSON = true) 
   });
 }
 
-export function errorToast(err) {
+export function errorToast(err, msg = null) {
   console.error(err);
   Toast.open({
-    message: "Error: " + err.toString(),
+    duration: 2000,
+    message: "Error: " + msg != null ? msg : err.toString(),
     type: "is-danger"
   });
 }
@@ -101,4 +103,13 @@ export function isImage(fileType) {
   return fileType.toLowerCase().match('(jpeg|jpg|gif|png)') != null;
 }
 
-export default { APIError, fetchData, errorToast, formatApiUrL, formatFileDate, formatFileSize, isImage };
+export function expandFile(file, index, selected = false) {
+  return {...file, ...{
+    index: index,
+    selected: selected,
+    name: path.basename(file.p),
+    ext: path.extname(file.p).slice(1)
+  }};
+}
+
+export default { APIError, fetchData, errorToast, formatApiUrL, formatFileDate, formatFileSize, isImage, expandFile };
