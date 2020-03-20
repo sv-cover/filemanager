@@ -16,18 +16,18 @@ import path from 'path';
 export default {
   name: 'Breadcrumb',
   props: {
-    data: String
+    value: String
   },
   computed: {
-    isEmpty: vm => vm.data === null,
-    breadCrumb: vm => vm.data.split('/')
+    isEmpty: vm => vm.value === null,
+    breadCrumb: vm => vm.value.split('/')
   },
   methods: {
     isLastCrumb: function(index) {
       return index == (this.breadCrumb.length - 1);
     },
     clickCrumb: function(index) {
-      this.$emit('update:data', this.breadCrumb.slice(0, index+1).join('/'));
+      this.$emit('input', this.breadCrumb.slice(0, index+1).join('/'));
     }
   }
 };

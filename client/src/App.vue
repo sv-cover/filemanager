@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <TopMenu :currentFolder.sync="currentDirectory" />
+    <TopMenu/>
     <section class="section main">
       <b-loading :active="isLoadingConfig" />
       <div v-if="!isLoadingConfig" class="mainView">

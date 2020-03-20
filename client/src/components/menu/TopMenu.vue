@@ -2,50 +2,39 @@
   <section class="topmenu has-background-grey-dark">
     <b-field grouped>
       <b-field>
-        <b-dropdown aria-role="list">
+        <b-dropdown aria-role="menu">
             <button class="button" slot="trigger" slot-scope="{ active }">
                 <span>Files</span>
                 <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
             </button>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="monitor"/> Preview</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="download"/> Download</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="folder-plus"/> New Folder</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="content-cut"/> Cut</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="content-copy"/> Copy</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="content-paste"/> Paste</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="delete"/> Delete</b-dropdown-item>
-            <b-dropdown-item aria-role="listitem"><b-icon icon="pencil"/> Rename</b-dropdown-item>
+            <b-dropdown-item 
+              aria-role="menuitem"
+              :focusable="false"
+            >
+              <FileMenu/>
+            </b-dropdown-item>
+            
         </b-dropdown>
       </b-field>
 
-      <Breadcrumb :data.sync="newCurrentFolder" />
-
-      <b-field grouped position="is-right" expanded>
-        <b-field>
-          <b-button icon-left="magnify"></b-button>
+      <b-field grouped position="is-centered" expanded>
+        <b-field expanded>
+          <Breadcrumb v-if="isBreadcrumb" v-model="currentDirectory" />
+          <b-input v-else v-model="searchBar" />
         </b-field>
-
-        <b-field>
-          <b-dropdown position="is-bottom-left" aria-role="list">
-              <button class="button" slot="trigger" slot-scope="{ active }">
-                  <b-icon icon="sort-ascending"></b-icon>
-                  <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
-              </button>
-              <b-dropdown-item aria-role="listitem"><b-icon icon="sort-ascending"/> A-Z</b-dropdown-item>
-              <b-dropdown-item aria-role="listitem"><b-icon icon="sort-descending"/> Z-A</b-dropdown-item>
-          </b-dropdown>
+        <b-field position="is-right">
+          <b-checkbox-button :native-value="false" v-model="isBreadcrumb">
+            <b-icon icon="magnify" />
+          </b-checkbox-button>
         </b-field>
+      </b-field>
 
+      <b-field grouped position="is-right">
         <b-field>
-          <b-dropdown position="is-bottom-left" aria-role="list">
-              <button size="is-small" class="button" slot="trigger" slot-scope="{ active }">
-                  <b-icon icon="format-list-bulleted"></b-icon>
-                  <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
-              </button>
-              <b-dropdown-item aria-role="listitem"><b-icon icon="format-list-bulleted"/> Details</b-dropdown-item>
-              <b-dropdown-item aria-role="listitem"><b-icon icon="file-image"/> Thumbnails</b-dropdown-item>
-          </b-dropdown>
+          <FilemanSelect :options="sortOptions" v-model="sortOrder" position="is-bottom-left" />
         </b-field>
+        <b-field>
+          <FilemanSelect :options="viewOptions" v-model="view" position="is-bottom-left" />
         </b-field>
       </b-field>
       
@@ -54,32 +43,55 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
+
 import FileMenu from './FileMenu.vue';
 import Breadcrumb from './Breadcrumb.vue';
+import FilemanSelect from './FilemanSelect'
 
 export default {
   name: 'TopMenu',
   components: {
     FileMenu,
-    Breadcrumb
+    Breadcrumb,
+    FilemanSelect
   },
-  props: {
-    currentFolder: {
-      type: String,
-      default: () => ''
-    },
-    selectedFiles: {
-      type: Array,
-      default: () => []
+  data() {
+    return {
+      breadcrumb: true
     }
   },
   computed: {
-    newCurrentFolder: {
-      get: vm => vm.currentFolder,
-      set: function(path) {
-        this.$emit('update:currentFolder', path);
+    ...mapState({
+      viewOptions: state => state.ui.viewOptions
+    }),
+    ...mapGetters({
+      sortOptions: 'getSortOptionsList'
+    }),
+    view: {
+      get: vm => vm.$store.state.ui.view,
+      set: function(view) {this.$store.dispatch('setView', view);}
+    },
+    sortOrder: {
+      get: vm => vm.$store.state.files.sortOrder,
+      set: function(order) {this.$store.dispatch('setSortOrder', order);}
+    },
+    searchBar: {
+      get: vm => vm.$store.state.files.searching,
+      set: function(input) {this.$store.dispatch('setSearch', input);}
+    },
+    currentDirectory: {
+      get: vm => vm.$store.state.dir.currentDirectory,
+      set: function(dir) {this.$store.dispatch('setCurrentDir', dir)}
+    },
+    isBreadcrumb: {
+      get: vm => vm.breadcrumb,
+      set: function(value) {
+        this.$store.dispatch('setSearch', '');
+        this.breadcrumb = value;
       }
     }
+
   }
 };
 </script>

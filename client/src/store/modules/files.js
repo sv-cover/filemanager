@@ -1,13 +1,40 @@
 import { basename } from "path";
 import api from "../api";
-import { SET_FILESLIST, SET_FILESLIST_LOADING, RESET_FILELIST_SELECTED, ADD_FILESLIST_SELECTED, SET_FILESLIST_SELECT, SET_FILESLIST_LASTSELECTED } from "../mutation-types";
+import {
+  SET_FILESLIST,
+  SET_FILESLIST_LOADING,
+  RESET_FILELIST_SELECTED,
+  ADD_FILESLIST_SELECTED,
+  SET_FILESLIST_SELECT,
+  SET_FILESLIST_LASTSELECTED,
+  SET_SEARCH,
+  SET_SORT_ORDER
+} from "../mutation-types";
+import { SORT_NAME_ASC, SORT_NAME_DESC } from "../sort-types";
 
 export default {
   state: {
     listFiles: [],
     isLoading: false,
-    sortOrder: null,
-    lastSelected: null
+    lastSelected: null,
+
+    searching: '',
+
+    sortOrder: SORT_NAME_ASC,
+    sortOptions: {
+      [SORT_NAME_ASC]: {
+        value: SORT_NAME_ASC,
+        label: "A-Z",
+        icon: "sort-ascending",
+        func: (file1, file2) => file1.name.localeCompare(file2.name) > 0
+      },
+      [SORT_NAME_DESC]: {
+        value: SORT_NAME_DESC,
+        label: "Z-A",
+        icon: "sort-descending",
+        func: (file1, file2) => file2.name.localeCompare(file1.name) > 0
+      }
+    }
   },
   mutations: {
     [SET_FILESLIST](state, files) {
@@ -37,13 +64,23 @@ export default {
     [SET_FILESLIST_LASTSELECTED](state, lastSelected) {
       state.lastSelected = lastSelected;
     },
+    [SET_SEARCH](state, input) {
+      state.searching = input;
+    },
+    [SET_SORT_ORDER](state, order) {
+      state.sortOrder = order;
+    }
   },
   getters: {
-    getSortedFilesList: (state) => () => {
-      return [...state.listFiles].sort((file1, file2) => file1.name.localeCompare(file2.name));
+    getSortedFilesList: state => () => {
+      const files = (state.searching != '') ? [...state.listFiles].filter(file => file.name.toLowerCase().indexOf(state.searching.toLowerCase()) >= 0) : [...state.listFiles];
+      return files.sort(state.sortOptions[state.sortOrder].func);
     },
-    getListSelecedFiles: (state) => () => {
+    getListSelecedFiles: state => () => {
       return state.listFiles.filter(file => file.selected);
+    },
+    getSortOptionsList: state => {
+      return Object.keys(state.sortOptions).map(key => state.sortOptions[key]);
     }
   },
   actions: {
@@ -74,6 +111,13 @@ export default {
     },
     setLastSelected(context, file) {
       context.commit(SET_FILESLIST_LASTSELECTED, file);
+    },
+    setSearch(context, input) {
+      context.commit(RESET_FILELIST_SELECTED);
+      context.commit(SET_SEARCH, input);
+    },
+    setSortOrder(context, order) {
+      context.commit(SET_SORT_ORDER, order);
     }
   }
 };
