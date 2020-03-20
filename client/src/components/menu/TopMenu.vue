@@ -2,7 +2,7 @@
   <section class="topmenu has-background-grey-dark">
     <b-field grouped>
       <b-field>
-        <b-dropdown aria-role="menu">
+        <b-dropdown aria-role="menu" trap-focus>
             <button class="button" slot="trigger" slot-scope="{ active }">
                 <span>Files</span>
                 <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>

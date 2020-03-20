@@ -1,7 +1,7 @@
 <template>
   <aside class="menu">
     <ul class="menu-list">
-      <FileMenuItem v-for="(o, i) in options" :key="i" :disabled="!o.enabled" :icon="o.icon" @click="notImplemented()">
+      <FileMenuItem v-for="(o, i) in options" :key="i" :disabled="!o.enabled" :icon="o.icon" @click="o.click()">
         {{o.label}}
       </FileMenuItem>
     </ul>
@@ -10,6 +10,7 @@
 
 <script>
 import FileMenuItem from './FileMenuItem';
+import PreviewModal from './PreviewModal'
 
 export default {
   name: "FileMenu",
@@ -25,7 +26,7 @@ export default {
           label: 'Preview',
           icon: 'monitor',
           enabled: vm.isOne,
-          click: vm.notImplemented
+          click: vm.preview
         },
         {
           label: 'Download',
@@ -81,13 +82,22 @@ export default {
     }
   },
   methods: {
-    notImplemented: function() {
+    notImplemented: function(element) {
       this.$buefy.toast.open({
         duration: 1000,
         message: `Not implemented yet`,
         type: "is-warning"
       });
     },
+    preview: function() {
+      this.$buefy.modal.open({
+        parent: this,
+        component: PreviewModal,
+        props: {
+          file: this.selectedFiles[0]
+        }
+      });
+    }
   }
 };
 </script>

@@ -43,7 +43,9 @@
 </template>
 
 <script>
-import { basename } from "path";
+import { basename } from 'path';
+
+import utils from '../utils';
 
 export default {
   name: "FileDetails",
@@ -60,28 +62,8 @@ export default {
     }
   },
   methods: {
-    formatFileDate: function(date) {
-      return new Date(date * 1000).toLocaleString();
-    },
-    formatFileSize: function(sizeInBytes) {
-      const byteUnits = [
-        "B",
-        "kB",
-        " MB",
-        " GB",
-        " TB",
-        "PB",
-        "EB",
-        "ZB",
-        "YB"
-      ];
-      let i = 0;
-      for (i = 0; i < byteUnits.length; i++) {
-        if (sizeInBytes < 1024) break;
-        sizeInBytes = sizeInBytes / 1024;
-      }
-      return sizeInBytes.toFixed(2) + " " + byteUnits[i];
-    },
+    formatFileDate: utils.formatFileDate,
+    formatFileSize: utils.formatFileSize,
     clickFile: function(event, file, index) {
       this.$emit("click:file", file, {
         ctrl: event.ctrlKey,

@@ -4,7 +4,7 @@
     :position="position"
     aria-role="list"
   >
-    <button class="button" slot="trigger">
+    <button class="button" slot="trigger" slot-scope="{ active }">
       <b-icon :icon="selectedOption.icon"></b-icon>
       <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
     </button>

@@ -1,6 +1,6 @@
 import { ToastProgrammatic as Toast } from "buefy";
 
-function APIError({ message, url, status, response }) {
+export function APIError({ message, url, status, response }) {
   this.name = "APIError";
   this.message = message;
   this.url = url;
@@ -20,7 +20,7 @@ function APIError({ message, url, status, response }) {
   };
 }
 
-function fetchData(url, method = "POST", body = null, expectJSON = true) {
+export function fetchData(url, method = "POST", body = null, expectJSON = true) {
   /**
    * Wrapper function for fetch. If expectJSON is true or unset, the result is expected to be json.
    */
@@ -55,7 +55,7 @@ function fetchData(url, method = "POST", body = null, expectJSON = true) {
   });
 }
 
-function errorToast(err) {
+export function errorToast(err) {
   console.error(err);
   Toast.open({
     message: "Error: " + err.toString(),
@@ -63,7 +63,7 @@ function errorToast(err) {
   });
 }
 
-function formatApiUrL(url, parameters) {
+export function formatApiUrL(url, parameters) {
   url = url + "?";
   for (const [key, value] of Object.entries(parameters)) {
     console.log(key, value);
@@ -73,4 +73,32 @@ function formatApiUrL(url, parameters) {
   return url;
 }
 
-export { APIError, fetchData, errorToast, formatApiUrL };
+export function formatFileDate(date) {
+  return new Date(date * 1000).toLocaleString();
+}
+
+export function formatFileSize(sizeInBytes) {
+  const byteUnits = [
+    "B",
+    "kB",
+    " MB",
+    " GB",
+    " TB",
+    "PB",
+    "EB",
+    "ZB",
+    "YB"
+  ];
+  let i = 0;
+  for (i = 0; i < byteUnits.length; i++) {
+    if (sizeInBytes < 1024) break;
+    sizeInBytes = sizeInBytes / 1024;
+  }
+  return sizeInBytes.toFixed(2) + " " + byteUnits[i];
+}
+
+export function isImage(fileType) {
+  return fileType.toLowerCase().match('(jpeg|jpg|gif|png)') != null;
+}
+
+export default { APIError, fetchData, errorToast, formatApiUrL, formatFileDate, formatFileSize, isImage };

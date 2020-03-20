@@ -1,4 +1,4 @@
-import { basename } from "path";
+import path from "path";
 import api from "../api";
 import {
   SET_FILESLIST,
@@ -40,8 +40,9 @@ export default {
     [SET_FILESLIST](state, files) {
       state.listFiles = files.map((file, index) => {
         file.index = index;
-        file.name = basename(file.p);
         file.selected = false;
+        file.name = path.basename(file.p);
+        file.ext = path.extname(file.p).slice(1);
         return file;
       });
     },

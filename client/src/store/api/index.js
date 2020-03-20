@@ -1,5 +1,5 @@
 import store from "../index";
-import { fetchData, formatApiUrL } from "../../utils";
+import { fetchData } from "../../utils";
 
 export default {
   getConfig() {
