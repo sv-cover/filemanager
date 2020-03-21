@@ -15,7 +15,7 @@ export default {
     },
     [SET_FILESLIST_SELECT](state, { file, select }) {
       if (select) state.selected.add(file.index);
-      else console.log(state.selected.delete(file.index));
+      else state.selected.delete(file.index);
       state.selected = new Set([...state.selected]);
     },
     [SET_FILESLIST_LASTSELECTED](state, lastSelected) {
