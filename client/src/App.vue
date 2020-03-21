@@ -12,7 +12,7 @@
           />
         </div>
         <div class="files ">
-          <FilesDetails :data="filesList" :isLoading="isLoadingFilesList" @click:file="clickFile" />
+          <FilesDetails :data="filesList" :isLoading="isLoadingFilesList" :selected="getBooleanSelectedFiles" @click:file="clickFile" />
         </div>
       </div>
     </section>
@@ -41,7 +41,8 @@ export default {
       isLoadingFilesList: state => state.files.isLoading
     }),
     ...mapGetters({
-      isLoadingConfig: 'isLoadingConfig'
+      isLoadingConfig: 'isLoadingConfig',
+      getBooleanSelectedFiles: 'getBooleanSelectedFiles'
     }),
     filesList: function() {
       return this.$store.getters.getSortedFilesList;
@@ -64,7 +65,7 @@ export default {
     },
     lastSelected: {
       get: function() {
-        return this.$store.state.files.lastSelected;
+        return this.$store.state.files.selection.lastSelected;
       },
       set: function(file) {
         this.$store.dispatch('setLastSelected', file);

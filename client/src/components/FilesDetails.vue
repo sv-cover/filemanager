@@ -13,7 +13,7 @@
           v-for="(file, index) in data"
           :key="index"
           @click="clickFile($event, file, index)"
-          :class="file.selected ? 'is-selected' : ''"
+          :class="selected[file.index] ? 'is-selected' : ''"
         >
           <td>
             <span draggable="true">
@@ -54,7 +54,8 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
-    }
+    },
+    selected: Array
   },
   computed: {
     isEmpty: function() {
