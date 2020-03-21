@@ -23,9 +23,9 @@
 import { mapState, mapGetters, mapActions } from "vuex";
 import { errorToast } from "./utils";
 
-import TopMenu from "./components/menu/TopMenu.vue";
+import TopMenu from "./components/menu/TopMenu";
 import Folders from "./components/Folders";
-import FilesDetails from "./components/FilesDetails.vue";
+import FilesDetails from "./components/FilesDetails";
 
 export default {
   name: "Fileman",

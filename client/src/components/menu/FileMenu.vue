@@ -1,6 +1,7 @@
 <template>
   <aside class="menu">
     <ul class="menu-list">
+      <Upload :currentFolder="currentDirectory" />
       <FileMenuItem
         v-for="(o, i) in options"
         :key="i"
@@ -18,12 +19,14 @@
 import { ToastProgrammatic as Toast } from "buefy";
 
 import FileMenuItem from "./FileMenuItem";
+import Upload from './Upload';
 import PreviewModal from "./PreviewModal";
 
 export default {
   name: "FileMenu",
   components: {
-    FileMenuItem
+    FileMenuItem,
+    Upload
   },
   computed: {
     isEmpty: vm => vm.selectedFiles.length == 0,
@@ -87,7 +90,15 @@ export default {
       set: function(selected) {
         this.$store.dispatch("setSelectedFiles", selected);
       }
-    }
+    },
+    currentDirectory: {
+      get: function() {
+        return this.$store.state.dir.currentDirectory;
+      },
+      set: function(dir) {
+        this.$store.dispatch('setCurrentDir', dir);
+      }
+    },
   },
   methods: {
     notImplemented: function(element) {
@@ -106,15 +117,29 @@ export default {
         }
       });
     },
+    upload: function() {
+      this.$buefy.dialog.prompt({
+        message: "Upload files",
+        inputAttrs: {
+          type: "file"
+        },
+        trapFocus: true,
+        onConfirm: value => console.log(value)
+      });
+    },
     rename: function() {
       this.$buefy.dialog.prompt({
         message: `New name for ` + this.selectedFiles[0].name,
         inputAttrs: {
           placeholder: "example.png",
-           value: this.selectedFiles[0].name
+          value: this.selectedFiles[0].name
         },
         trapFocus: true,
-        onConfirm: value => this.$store.dispatch('setFileName', {file: this.selectedFiles[0], newName: value})
+        onConfirm: value =>
+          this.$store.dispatch("setFileName", {
+            file: this.selectedFiles[0],
+            newName: value
+          })
       });
     }
   }

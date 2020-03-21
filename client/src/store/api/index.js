@@ -1,5 +1,5 @@
 import store from "../index";
-import { fetchData } from "../../utils";
+import { fetchData, errorToast } from "../../utils";
 
 export default {
   getConfig() {
@@ -25,8 +25,15 @@ export default {
     return fetchData(store.state.ui.config.RENAMEDIR, 'POST', { d: path, n: newName });
   },
 
-  uploadFile(path) {
-    return fetchData(store.state.ui.config.UPLOAD, 'POST', { d: path });
+  uploadFiles(path, files) {
+    const form = new FormData();
+    form.set('action', 'upload');
+    form.set('method', 'ajax');
+    form.set('d', path);
+    for (const index in files) {
+      form.append('files[]', files[index], files[index].name);
+    }
+    return fetchData(store.state.ui.config.UPLOAD, 'POST', form, true);
   },
   downloadFile(path) {
     return fetchData(store.state.ui.config.DOWNLOAD, 'POST', { f: path });

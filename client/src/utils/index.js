@@ -21,19 +21,24 @@ export function APIError({ message, url, status, response }) {
   };
 }
 
-export function fetchData(url, method = "POST", body = null, expectJSON = true) {
+export function fetchData(url, method = "POST", body = null, mulitForm=false, expectJSON = true) {
   /**
    * Wrapper function for fetch. If expectJSON is true or unset, the result is expected to be json.
    */
-  var headers = new Headers({
-    "Content-Type": "application/json"
-  });
+  var headers = undefined;
+  if (!mulitForm) {
+    headers = new Headers({
+      "Content-Type": "application/json"
+    });
+  } else {
+  }
   var init = {
     method: method,
     headers: headers
   };
 
-  if (body) init["body"] = JSON.stringify(body);
+  if (body && !mulitForm) init["body"] = JSON.stringify(body);
+  else init["body"] = body;
 
   return fetch(url, init).then(response => {
     var contentType = response.headers.get("content-type");

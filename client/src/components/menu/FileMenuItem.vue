@@ -1,7 +1,7 @@
 <template>
       <li>
         <a @click="click()" :class="classDisabled(disabled)">
-          <b-icon :icon="icon" />&nbsp;<slot></slot>
+          <b-icon :icon="icon" /><span><slot></slot></span>
         </a>
       </li>
 </template>

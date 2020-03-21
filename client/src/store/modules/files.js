@@ -1,6 +1,6 @@
 import path from 'path';
 import api from "../api";
-import { expandFile } from '../../utils';
+import { errorToast, expandFile } from '../../utils';
 import {
   SET_FILESLIST,
   SET_FILESLIST_LOADING,
