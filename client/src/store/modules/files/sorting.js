@@ -34,7 +34,7 @@ export default {
     }
   },
   getters: {
-    getSortedFilesList: (state, getters, rootState) => () => {
+    getSortedFilesList: (state, getters, rootState) => {
       let files = [...rootState.files.listFiles];
       if (state.searching != "") {
         files = files.filter(file => file.name.toLowerCase().indexOf(state.searching.toLowerCase()) >= 0)

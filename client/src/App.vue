@@ -44,7 +44,7 @@ export default {
       isLoadingConfig: 'isLoadingConfig'
     }),
     filesList: function() {
-      return this.$store.getters.getSortedFilesList();
+      return this.$store.getters.getSortedFilesList;
     },
     currentDirectory: {
       get: function() {
