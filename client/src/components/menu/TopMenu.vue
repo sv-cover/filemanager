@@ -73,11 +73,11 @@ export default {
       set: function(view) {this.$store.dispatch('setView', view);}
     },
     sortOrder: {
-      get: vm => vm.$store.state.files.sortOrder,
+      get: vm => vm.$store.state.files.sorting.sortOrder,
       set: function(order) {this.$store.dispatch('setSortOrder', order);}
     },
     searchBar: {
-      get: vm => vm.$store.state.files.searching,
+      get: vm => vm.$store.state.files.sorting.searching,
       set: function(input) {this.$store.dispatch('setSearch', input);}
     },
     currentDirectory: {

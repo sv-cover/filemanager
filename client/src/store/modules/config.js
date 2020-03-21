@@ -1,31 +1,14 @@
 import api from "../api";
 import { errorToast } from "../../utils";
-import { SET_CONFIG, SET_VIEW } from "../mutation-types";
-import { VIEW_DETAILS, VIEW_THUMB } from "../view-types";
+import { SET_CONFIG } from "../mutation-types";
 
 export default {
   state: {
-    config: null,
-    view: VIEW_DETAILS,
-    viewOptions: [
-      {
-        value: VIEW_DETAILS,
-        label: "Details",
-        icon: "format-list-bulleted"
-      },
-      {
-        value: VIEW_THUMB,
-        label: "Thumbnails",
-        icon: "file-image"
-      }
-    ]
+    config: null
   },
   mutations: {
     [SET_CONFIG](state, config) {
       state.config = config;
-    },
-    [SET_VIEW](state, view) {
-      state.view = view;
     }
   },
   getters: {
@@ -48,9 +31,6 @@ export default {
             reject(err);
           });
       });
-    },
-    setView(context, view) {
-      context.commit(SET_VIEW, view);
     }
   }
 };
