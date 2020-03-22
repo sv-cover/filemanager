@@ -11,6 +11,9 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapActions } from "vuex";
+
+import { errorToast } from "../../utils";
 import Folder from './Folder'
 
 export default {
@@ -18,20 +21,26 @@ export default {
   components: {
     Folder
   },
-  props: {
-    folders: Array,
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
+  computed: {
+    ...mapState({
+      folders: state => state.dir.listDirectories,
+      isLoading: state => state.dir.isLoading
+    }),
     currentFolder: {
-      type: String,
-      default: () => ''
+      get: function() {
+        return this.$store.state.dir.currentDirectory;
+      },
+      set: function(dir) {
+        this.$store.dispatch('setCurrentDir', dir);
+      }
     }
   },
   methods: {
+    ...mapActions({
+      setCurrentFolderStore: 'setCurrentDir'
+    }),
     setCurrentFolder: function (event) {
-      this.$emit('update:currentFolder', event)
+      this.currentFolder = event;
     }
   }
 }

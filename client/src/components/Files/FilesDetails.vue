@@ -45,7 +45,7 @@
 <script>
 import { basename } from 'path';
 
-import utils from '../utils';
+import utils from '../../utils';
 
 export default {
   name: "FileDetails",
