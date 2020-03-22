@@ -7,7 +7,7 @@ body{
   height: 100%;
   border: medium groove;
   border-radius: 5px;
-
+  padding: 0px;
 }
 
 iframe{

@@ -36,6 +36,8 @@ export default {
     },
     setCurrentDir(context, dir) {
       context.commit(SET_CURRENT_DIR, dir);
+      context.dispatch('setSelectedFiles', []);
+      context.dispatch('setLastSelected', null);
       context.dispatch('loadFiles', dir);
     } 
   },

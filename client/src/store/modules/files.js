@@ -1,14 +1,12 @@
 import path from "path";
-import api from "../../api";
-import { errorToast, expandFile } from "../../../utils";
+import api from "../api";
+import { errorToast, expandFile } from "../../utils";
 import {
   SET_FILESLIST,
   SET_FILESLIST_LOADING,
   SET_FILESLIST_LASTSELECTED,
   RENAME_FILE
-} from "../../mutation-types";
-import sorting from "./sorting";
-import selection from "./selection";
+} from "../mutation-types";
 
 export default {
   state: {
@@ -51,7 +49,40 @@ export default {
       });
     },
 
-    setFileName(context, { file, newName }) {
+    uploadFiles(context, { path, files }) {
+      return new Promise((resolve, reject) => {
+        api
+          .uploadFiles(path, files)
+          .then(() => {
+            context.dispatch("loadViewState");
+            resolve("succes");
+          })
+          .catch(err => {
+            errorToast(err, "Files failed to load.");
+            reject(err);
+          });
+      });
+    },
+
+    async moveFiles(context, {target, files}) {
+      for (let i = 0; i < files.length; i++) {
+        await api.moveFile(files[i].p, path.join(target, files[i].name)).catch(err => errorToast(err, "Files failed to move"));
+        context.dispatch('loadViewState');
+      }
+    },
+    async copyFiles(context, {target, files}) {
+      for (let i = 0; i < files.length; i++) {
+        await api.copyFile(files[i].p, path.join(target, files[i].name)).catch(err => errorToast(err, "Files failed to copy"));
+        context.dispatch('loadViewState');
+      }
+    },
+    async deleteFiles(context, files) {
+      for (let i = 0; i < files.length; i++) {
+        await api.deleteFile(files[i].p);
+        context.dispatch('loadViewState');
+      }
+    },
+    renameFile(context, { file, newName }) {
       return new Promise((resolve, reject) => {
         if (file.name === newName) return;
         api
@@ -66,20 +97,5 @@ export default {
           });
       });
     },
-    uploadFiles(context, { path, files }) {
-      return new Promise((resolve, reject) => {
-        api
-          .uploadFiles(path, files)
-          .then(() => {
-            context.dispatch("loadViewState");
-            resolve("succes");
-          })
-          .catch(reject);
-      });
-    }
-  },
-  modules: {
-    sorting,
-    selection
   }
 };

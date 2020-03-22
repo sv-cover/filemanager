@@ -11,7 +11,7 @@
               aria-role="menuitem"
               :focusable="false"
             >
-              <FileMenu/>
+              <FileMenu hasUpload hasPreview />
             </b-dropdown-item>
             
         </b-dropdown>
@@ -73,11 +73,11 @@ export default {
       set: function(view) {this.$store.dispatch('setView', view);}
     },
     sortOrder: {
-      get: vm => vm.$store.state.files.sorting.sortOrder,
+      get: vm => vm.$store.state.sorting.sortOrder,
       set: function(order) {this.$store.dispatch('setSortOrder', order);}
     },
     searchBar: {
-      get: vm => vm.$store.state.files.sorting.searching,
+      get: vm => vm.$store.state.sorting.searching,
       set: function(input) {this.$store.dispatch('setSearch', input);}
     },
     currentDirectory: {

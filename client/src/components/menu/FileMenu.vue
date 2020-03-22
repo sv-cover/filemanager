@@ -1,7 +1,10 @@
 <template>
   <aside class="menu">
     <ul class="menu-list">
-      <Upload :currentFolder="currentDirectory" />
+      <Upload v-if="hasUpload" :currentFolder="currentDirectory" />
+      <FileMenuItem v-if="hasPreview" :disabled="!isOne" icon="monitor" @click="preview()">
+        Preview
+      </FileMenuItem>
       <FileMenuItem
         v-for="(o, i) in options"
         :key="i"
@@ -17,6 +20,7 @@
 
 <script>
 import { ToastProgrammatic as Toast } from "buefy";
+import { MapState } from 'vuex'
 
 import FileMenuItem from "./FileMenuItem";
 import Upload from './Upload';
@@ -28,17 +32,22 @@ export default {
     FileMenuItem,
     Upload
   },
+  props: {
+    hasUpload: {
+      type: Boolean,
+      default: false
+    },
+    hasPreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   computed: {
     isEmpty: vm => vm.selectedFiles.length == 0,
     isOne: vm => vm.selectedFiles.length == 1,
+    clipboard: vm => vm.$store.state.clipboard.clipboard.length > 0,
     options: vm => {
       return [
-        {
-          label: "Preview",
-          icon: "monitor",
-          enabled: vm.isOne,
-          click: vm.preview
-        },
         {
           label: "Download",
           icon: "download",
@@ -55,25 +64,25 @@ export default {
           label: "Cut",
           icon: "content-cut",
           enabled: !vm.isEmpty,
-          click: vm.notImplemented
+          click: vm.cut
         },
         {
           label: "Copy",
           icon: "content-copy",
           enabled: !vm.isEmpty,
-          click: vm.notImplemented
+          click: vm.copy
         },
         {
           label: "Paste",
           icon: "content-paste",
-          enabled: vm.isEmpty,
-          click: vm.notImplemented
+          enabled: vm.clipboard,
+          click: vm.paste
         },
         {
           label: "Delete",
           icon: "delete",
           enabled: !vm.isEmpty,
-          click: vm.notImplemented
+          click: vm.delete
         },
         {
           label: "Rename",
@@ -127,16 +136,38 @@ export default {
         onConfirm: value => console.log(value)
       });
     },
+    cut: function() {
+      this.$store.dispatch('setClipboard', {selection: this.selectedFiles, cut: true});
+    },
+    copy: function() {
+      this.$store.dispatch('setClipboard', {selection: this.selectedFiles});
+    },
+    paste: function() {
+      this.$store.dispatch('getClipboard').then(files => {
+        if (this.$store.state.clipboard.cut) {
+          this.$store.dispatch('moveFiles', {target: this.currentDirectory, files: files});
+        } else {
+          this.$store.dispatch('copyFiles', {target: this.currentDirectory, files: files});
+        }
+      })
+    },
+    delete: function() {
+      this.$buefy.dialog.confirm({
+        message: 'Are you sure you want to delete these files?',
+        trapFocus: true,
+        onConfirm: () => this.$store.dispatch('deleteFiles', this.selectedFiles)
+      });
+      
+    },
     rename: function() {
       this.$buefy.dialog.prompt({
         message: `New name for ` + this.selectedFiles[0].name,
         inputAttrs: {
-          placeholder: "example.png",
           value: this.selectedFiles[0].name
         },
         trapFocus: true,
         onConfirm: value =>
-          this.$store.dispatch("setFileName", {
+          this.$store.dispatch("renameFile", {
             file: this.selectedFiles[0],
             newName: value
           })

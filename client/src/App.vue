@@ -65,7 +65,7 @@ export default {
     },
     lastSelected: {
       get: function() {
-        return this.$store.state.files.selection.lastSelected;
+        return this.$store.state.selection.lastSelected;
       },
       set: function(file) {
         this.$store.dispatch('setLastSelected', file);

@@ -32,7 +32,7 @@ function fDAccessControl(req, res, next) {
 
 // A middleware function that checks if you have access to the new location in the query
 function nAccessControl(req, res, next) {
-  if (utils.fileFolderAccess(req.session, req.query.n) ) {
+  if (utils.fileFolderAccess(req.session, req.body.n) ) {
     next();
   } else {
     res.status(403).send('You are not allowed create files or folders in this folder');

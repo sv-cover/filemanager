@@ -16,7 +16,7 @@
           :class="selected[file.index] ? 'is-selected' : ''"
         >
           <td>
-            <span draggable="true">
+            <span>
               <b-icon size="is-small" icon="file" />
               {{ file.name }}
             </span>

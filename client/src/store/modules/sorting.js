@@ -1,8 +1,8 @@
 import {
   SET_SEARCH,
   SET_SORT_ORDER
-} from "../../mutation-types";
-import { SORT_NAME_ASC, SORT_NAME_DESC } from "../../sort-types";
+} from "../mutation-types";
+import { SORT_NAME_ASC, SORT_NAME_DESC } from "../sort-types";
 
 export default {
   state: {
