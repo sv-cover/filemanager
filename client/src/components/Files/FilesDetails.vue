@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="files-details" @contextmenu.prevent="rightClick">
     <table class="table is-striped is-narrow is-hoverable is-fullwidth">
       <thead>
         <tr>
@@ -13,6 +13,7 @@
           v-for="(file, index) in data"
           :key="index"
           @click="clickFile($event, file, index)"
+          @contextmenu.stop.prevent="rightClick($event, file)"
           :class="selected[file.index] ? 'is-selected' : ''"
         >
           <td>
@@ -70,6 +71,9 @@ export default {
         ctrl: event.ctrlKey,
         shift: event.shiftKey
       });
+    },
+    rightClick: function(event, file = null) {
+      this.$emit('contextmenu', event, file);
     }
   }
 };
@@ -85,5 +89,9 @@ export default {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Opera and Firefox */
+}
+.files-details {
+  height: 100%;
+  width: 100%;
 }
 </style>

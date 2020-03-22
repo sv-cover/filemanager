@@ -4,10 +4,10 @@
     <section class="section main">
       <b-loading :active="isLoadingConfig" />
       <div v-if="!isLoadingConfig" class="mainView">
-        <div class="folder has-background-light">
+        <div class="folder has-background-light column is-one-quarter">
           <Folders />
         </div>
-        <div class="files ">
+        <div class="files column">
           <Files />
         </div>
       </div>
@@ -67,13 +67,11 @@ export default {
 }
 .folder {
   height: 100%;
-  width: 20%;
   overflow-x: scroll;
   padding: 1rem;
   white-space: nowrap;
 }
 .files {
   height: 100%;
-  flex-grow: 1;
 }
 </style>

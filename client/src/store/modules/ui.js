@@ -1,7 +1,7 @@
 import api from "../api";
 import { errorToast } from "../../utils";
 import { SET_CONFIG, SET_VIEW } from "../mutation-types";
-import { VIEW_DETAILS, VIEW_THUMB } from "../view-types";
+import { VIEW_DETAILS, VIEW_THUMBS } from "../view-types";
 
 export default {
   state: {
@@ -14,7 +14,7 @@ export default {
         icon: "format-list-bulleted"
       },
       {
-        value: VIEW_THUMB,
+        value: VIEW_THUMBS,
         label: "Thumbnails",
         icon: "file-image"
       }

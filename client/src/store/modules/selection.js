@@ -30,7 +30,8 @@ export default {
       );
     },
     getBooleanSelectedFiles: (state, getters, rootState) =>
-      rootState.files.listFiles.map(file => state.selected.has(file.name))
+      rootState.files.listFiles.map(file => state.selected.has(file.name)),
+    isInSelected: state => file => state.selected.has(file.name)
   },
   actions: {
     setSelectedFiles(context, selected) {

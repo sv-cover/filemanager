@@ -5,7 +5,13 @@
     </p>
     <ul class="menu-list is-size-7">
       <li><b-progress v-if="isLoading" /></li>
-      <Folder v-for="(folder, index) in folders" :key="index" :folder="folder" :currentFolder="currentFolder" v-on:update:currentFolder="setCurrentFolder" />
+      <Folder
+        v-for="(folder, index) in folders"
+        :key="index"
+        :folder="folder"
+        :currentFolder="currentFolder"
+        v-on:update:currentFolder="setCurrentFolder"
+      />
     </ul>
   </aside>
 </template>
@@ -14,10 +20,10 @@
 import { mapState, mapGetters, mapActions } from "vuex";
 
 import { errorToast } from "../../utils";
-import Folder from './Folder'
+import Folder from "./Folder";
 
 export default {
-  name: 'Folders',
+  name: "Folders",
   components: {
     Folder
   },
@@ -31,21 +37,20 @@ export default {
         return this.$store.state.dir.currentDirectory;
       },
       set: function(dir) {
-        this.$store.dispatch('setCurrentDir', dir);
+        this.$store.dispatch("setCurrentDir", dir);
       }
     }
   },
   methods: {
     ...mapActions({
-      setCurrentFolderStore: 'setCurrentDir'
+      setCurrentFolderStore: "setCurrentDir"
     }),
-    setCurrentFolder: function (event) {
+    setCurrentFolder: function(event) {
       this.currentFolder = event;
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
