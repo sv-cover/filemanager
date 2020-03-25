@@ -64,38 +64,37 @@ export default {
       });
     },
 
-    async moveFiles(context, {target, files}) {
+    async moveFiles(context, { target, files }) {
       for (let i = 0; i < files.length; i++) {
-        await api.moveFile(files[i].p, path.join(target, files[i].name)).catch(err => errorToast(err, "Files failed to move"));
-        context.dispatch('loadViewState');
+        await api
+          .moveFile(files[i].p, path.join(target, files[i].name))
+          .catch(err => errorToast(err, "Files failed to move"));
       }
     },
-    async copyFiles(context, {target, files}) {
+    async copyFiles(context, { target, files }) {
       for (let i = 0; i < files.length; i++) {
-        await api.copyFile(files[i].p, path.join(target, files[i].name)).catch(err => errorToast(err, "Files failed to copy"));
-        context.dispatch('loadViewState');
+        await api
+          .copyFile(files[i].p, path.join(target, files[i].name))
+          .catch(err => errorToast(err, "Files failed to copy"));
       }
     },
     async deleteFiles(context, files) {
       for (let i = 0; i < files.length; i++) {
         await api.deleteFile(files[i].p);
-        context.dispatch('loadViewState');
       }
     },
     renameFile(context, { file, newName }) {
-      return new Promise((resolve, reject) => {
-        if (file.name === newName) return;
-        api
-          .renameFile(file.p, newName)
-          .then(() => {
-            context.commit(RENAME_FILE, { file, newName });
-            resolve("success");
-          })
-          .catch(err => {
-            errorToast(err, `Failed to rename ${file.name} to ${newName}.`);
-            reject(err);
-          });
-      });
-    },
+      if (file.name === newName) return;
+      api
+        .renameFile(file.p, newName)
+        .then(() => {
+          context.commit(RENAME_FILE, { file, newName });
+          resolve("success");
+        })
+        .catch(err => {
+          errorToast(err, `Failed to rename ${file.name} to ${newName}.`);
+          reject(err);
+        });
+    }
   }
 };

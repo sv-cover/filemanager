@@ -52,7 +52,7 @@ export default {
     }),
     selectedFiles: {
       get: function() {
-        return this.$store.getters.getListSelecedFiles();
+        return this.$store.getters.getListSelecedItems;
       },
       set: function(selected) {
         this.$store.dispatch("setSelectedFiles", selected);
@@ -118,7 +118,7 @@ export default {
 </script>
 
 <style>
-.height {
+.files {
   height: 100%;
   width: 100%;
 }

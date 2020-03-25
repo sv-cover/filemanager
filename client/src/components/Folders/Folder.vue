@@ -1,6 +1,6 @@
 <template>
   <li>
-    <a :class="isActive ? 'is-active' : ''" v-on:click="clickFolder">
+    <a :class="isActive ? 'is-active' : ''" @click="clickFolder" @contextmenu.prevent="rightClick($event, folder)">
       <b-icon
         size="is-small"
         :icon="getIcon"
@@ -13,7 +13,8 @@
         :key="index"
         :folder="child"
         :currentFolder="currentFolder"
-        v-on:update:currentFolder="setCurrentFolder"
+        @update:currentFolder="setCurrentFolder"
+        @contextmenu="rightClick"
       />
     </ul>
   </li>
@@ -65,6 +66,9 @@ export default {
     },
     setCurrentFolder: function(event) {
       this.$emit("update:currentFolder", event);
+    },
+    rightClick: function(event, folder) {
+      this.$emit('contextmenu', event, folder);
     }
   }
 };

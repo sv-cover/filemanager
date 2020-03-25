@@ -20,7 +20,7 @@
 
 <script>
 import { ToastProgrammatic as Toast } from "buefy";
-import { MapState } from 'vuex'
+import { mapState, mapGetters, } from 'vuex'
 
 import FileMenuItem from "./FileMenuItem";
 import Upload from './Upload';
@@ -40,25 +40,38 @@ export default {
     hasPreview: {
       type: Boolean,
       default: false
+    },
+    targetFolder: {
+      type: Object,
+      default: null
     }
   },
   computed: {
-    isEmpty: vm => vm.selectedFiles.length == 0,
-    isOne: vm => vm.selectedFiles.length == 1,
+    currentDirectory: vm => {
+      if (vm.targetFolder === null) return vm.$store.getters.getCurrentDirectory;
+      else return vm.targetFolder.p;
+    },
+    selectedItems: vm => {
+      if (vm.targetFolder === null) return vm.$store.getters.getListSelecedItems;
+      else return [vm.targetFolder];
+    },
+    isEmpty: vm => vm.selectedItems.length == 0,
+    isOne: vm => vm.selectedItems.length == 1,
+    canCreateFolder: vm => vm.selectedItems.filter(i => i.type == "DIRECTORY").length || vm.isEmpty,
     clipboard: vm => vm.$store.state.clipboard.clipboard.length > 0,
     options: vm => {
       return [
         {
           label: "Download",
           icon: "download",
-          enabled: !vm.isOne,
+          enabled: !vm.isEmpty,
           click: vm.notImplemented
         },
         {
           label: "New Folder",
           icon: "folder-plus",
-          enabled: vm.isEmpty,
-          click: vm.notImplemented
+          enabled: vm.canCreateFolder,
+          click: vm.createFolder
         },
         {
           label: "Cut",
@@ -92,22 +105,6 @@ export default {
         }
       ];
     },
-    selectedFiles: {
-      get: function() {
-        return this.$store.getters.getListSelecedFiles();
-      },
-      set: function(selected) {
-        this.$store.dispatch("setSelectedFiles", selected);
-      }
-    },
-    currentDirectory: {
-      get: function() {
-        return this.$store.state.dir.currentDirectory;
-      },
-      set: function(dir) {
-        this.$store.dispatch('setCurrentDir', dir);
-      }
-    },
   },
   methods: {
     notImplemented: function(element) {
@@ -122,7 +119,7 @@ export default {
         parent: this,
         component: PreviewModal,
         props: {
-          file: this.selectedFiles[0]
+          file: this.selectedItems[0]
         }
       });
     },
@@ -136,18 +133,32 @@ export default {
         onConfirm: value => console.log(value)
       });
     },
+    createFolder: function() {
+      this.$buefy.dialog.prompt({
+        message: "Create new folder",
+        inputAttrs: {
+          placeholder: "Input the name of the new folder here"
+        },
+        trapFocus: true,
+        onConfirm: value =>
+          this.$store.dispatch("createDir", {
+            path: this.currentDirectory,
+            name: value
+          })
+      });
+    },
     cut: function() {
-      this.$store.dispatch('setClipboard', {selection: this.selectedFiles, cut: true});
+      this.$store.dispatch('setClipboard', {selection: this.selectedItems, cut: true});
     },
     copy: function() {
-      this.$store.dispatch('setClipboard', {selection: this.selectedFiles});
+      this.$store.dispatch('setClipboard', {selection: this.selectedItems});
     },
     paste: function() {
       this.$store.dispatch('getClipboard').then(files => {
         if (this.$store.state.clipboard.cut) {
-          this.$store.dispatch('moveFiles', {target: this.currentDirectory, files: files});
+          this.$store.dispatch('move', {target: this.currentDirectory, items: files});
         } else {
-          this.$store.dispatch('copyFiles', {target: this.currentDirectory, files: files});
+          this.$store.dispatch('copy', {target: this.currentDirectory, items: files});
         }
       })
     },
@@ -155,20 +166,20 @@ export default {
       this.$buefy.dialog.confirm({
         message: 'Are you sure you want to delete these files?',
         trapFocus: true,
-        onConfirm: () => this.$store.dispatch('deleteFiles', this.selectedFiles)
+        onConfirm: () => this.$store.dispatch('delete', this.selectedItems)
       });
       
     },
     rename: function() {
       this.$buefy.dialog.prompt({
-        message: `New name for ` + this.selectedFiles[0].name,
+        message: `New name for ` + this.selectedItems[0].name,
         inputAttrs: {
-          value: this.selectedFiles[0].name
+          value: this.selectedItems[0].name
         },
         trapFocus: true,
         onConfirm: value =>
-          this.$store.dispatch("renameFile", {
-            file: this.selectedFiles[0],
+          this.$store.dispatch("rename", {
+            item: this.selectedItems[0],
             newName: value
           })
       });

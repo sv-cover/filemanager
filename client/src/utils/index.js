@@ -64,7 +64,7 @@ export function fetchData(url, method = "POST", body = null, mulitForm=false, ex
 export function errorToast(err, msg = null) {
   console.error(err);
   Toast.open({
-    duration: 2000,
+    duration: 3000,
     message: "Error: " + msg != null ? msg : err.toString(),
     type: "is-danger"
   });
@@ -110,6 +110,7 @@ export function isImage(fileType) {
 
 export function expandFile(file, index, selected = false) {
   return {...file, ...{
+    type: "FILE",
     index: index,
     selected: selected,
     name: path.basename(file.p),

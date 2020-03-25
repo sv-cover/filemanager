@@ -81,7 +81,7 @@ export default {
       set: function(input) {this.$store.dispatch('setSearch', input);}
     },
     currentDirectory: {
-      get: vm => vm.$store.state.dir.currentDirectory,
+      get: vm => vm.$store.getters.getCurrentDirectory,
       set: function(dir) {this.$store.dispatch('setCurrentDir', dir)}
     },
     isBreadcrumb: {

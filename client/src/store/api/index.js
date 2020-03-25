@@ -15,9 +15,6 @@ export default {
       n: name
     });
   },
-  deleteDir(path) {
-    return fetchData(store.state.ui.config.DELETEDIR, "POST", { d: path });
-  },
   moveDir(path, newPath) {
     return fetchData(store.state.ui.config.MOVEDIR, "POST", {
       d: path,
@@ -29,6 +26,9 @@ export default {
       d: path,
       n: copyPath
     });
+  },
+  deleteDir(path) {
+    return fetchData(store.state.ui.config.DELETEDIR, "POST", { d: path });
   },
   renameDir(path, newName) {
     return fetchData(store.state.ui.config.RENAMEDIR, "POST", {

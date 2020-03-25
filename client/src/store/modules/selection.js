@@ -12,11 +12,11 @@ export default {
   },
   mutations: {
     [SET_FILESLIST_SELECTED](state, selected) {
-      state.selected = new Set(selected.map(file => file.name));
+      state.selected = new Set(selected.map(file => file.p));
     },
     [SET_FILESLIST_SELECT](state, { file, select }) {
-      if (select) state.selected.add(file.name);
-      else state.selected.delete(file.name);
+      if (select) state.selected.add(file.p);
+      else state.selected.delete(file.p);
       state.selected = new Set([...state.selected]);
     },
     [SET_FILESLIST_LASTSELECTED](state, lastSelected) {
@@ -24,21 +24,25 @@ export default {
     }
   },
   getters: {
-    getListSelecedFiles: (state, getters, rootState) => () => {
-      return rootState.files.listFiles.filter(file =>
-        state.selected.has(file.name)
+    getListSelecedItems: (state, getters, rootState) => {
+      const dirs = rootState.dir.listDirectories.filter(folder =>
+        state.selected.has(folder.p)
       );
+      const files = rootState.files.listFiles.filter(file =>
+        state.selected.has(file.p)
+      );
+      return [...dirs, ...files];
     },
     getBooleanSelectedFiles: (state, getters, rootState) =>
-      rootState.files.listFiles.map(file => state.selected.has(file.name)),
-    isInSelected: state => file => state.selected.has(file.name)
+      rootState.files.listFiles.map(file => state.selected.has(file.p)),
+    isInSelected: state => file => state.selected.has(file.p)
   },
   actions: {
     setSelectedFiles(context, selected) {
       context.commit(SET_FILESLIST_SELECTED, selected);
     },
     addSelectedFiles(context, selected) {
-      selected = [...selected, ...context.getters.getListSelecedFiles()];
+      selected = [...selected, ...context.getters.getListSelecedItems];
       context.commit(SET_FILESLIST_SELECTED, selected);
     },
     removeSelectedFile(context, file) {
