@@ -19,6 +19,9 @@ export default {
       state.jobs[index].n++;
     }
   },
+  getters: {
+    getJobs: state => state.jobs
+  },
   actions: {
     processJob(context, { action, message, payloadList, onFinish = null }) {
       onFinish = onFinish === null ? () => {} : onFinish;
@@ -50,7 +53,6 @@ export default {
               status: status
             });
             this.onFinish(this);
-            console.log(this.message);
           }
         };
         context.commit(ADD_JOB, job);

@@ -115,7 +115,7 @@ export default {
     async deleteFile(context, file) {
       await api
         .deleteFile(file.p)
-        .then(() => context.commit(REMOVE_FILE_FILELIST, file))
+        .then(() => context.commit(REMOVE_FILE_FILELIST, file.p))
         .catch(err => {
           throw {
             err: err,

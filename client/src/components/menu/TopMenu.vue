@@ -3,17 +3,13 @@
     <b-field grouped>
       <b-field>
         <b-dropdown aria-role="menu" trap-focus>
-            <button class="button" slot="trigger" slot-scope="{ active }">
-                <span>Files</span>
-                <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
-            </button>
-            <b-dropdown-item 
-              aria-role="menuitem"
-              :focusable="false"
-            >
-              <FileMenu hasUpload hasPreview />
-            </b-dropdown-item>
-            
+          <button class="button" slot="trigger" slot-scope="{ active }">
+            <span>Files</span>
+            <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+          </button>
+          <b-dropdown-item aria-role="menuitem" :focusable="false">
+            <FileMenu hasUpload hasPreview />
+          </b-dropdown-item>
         </b-dropdown>
       </b-field>
 
@@ -30,68 +26,87 @@
       </b-field>
 
       <b-field grouped position="is-right">
+        <JobList />
+
         <b-field>
-          <FilemanSelect :options="sortOptions" v-model="sortOrder" position="is-bottom-left" />
+          <FilemanSelect
+            :options="sortOptions"
+            v-model="sortOrder"
+            position="is-bottom-left"
+          />
         </b-field>
+
         <b-field>
-          <FilemanSelect :options="viewOptions" v-model="view" position="is-bottom-left" />
+          <FilemanSelect
+            :options="viewOptions"
+            v-model="view"
+            position="is-bottom-left"
+          />
         </b-field>
       </b-field>
-      
     </b-field>
   </section>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters } from "vuex";
 
-import FileMenu from './FileMenu.vue';
-import Breadcrumb from './Breadcrumb.vue';
-import FilemanSelect from './FilemanSelect'
+import FileMenu from "./FileMenu.vue";
+import Breadcrumb from "./Breadcrumb.vue";
+import FilemanSelect from "./FilemanSelect";
+import JobList from "./JobList";
 
 export default {
-  name: 'TopMenu',
+  name: "TopMenu",
   components: {
     FileMenu,
     Breadcrumb,
-    FilemanSelect
+    FilemanSelect,
+    JobList
   },
   data() {
     return {
       breadcrumb: true
-    }
+    };
   },
   computed: {
     ...mapState({
       viewOptions: state => state.ui.viewOptions
     }),
     ...mapGetters({
-      sortOptions: 'getSortOptionsList'
+      sortOptions: "getSortOptionsList"
     }),
     view: {
       get: vm => vm.$store.state.ui.view,
-      set: function(view) {this.$store.dispatch('setView', view);}
+      set: function(view) {
+        this.$store.dispatch("setView", view);
+      }
     },
     sortOrder: {
       get: vm => vm.$store.state.sorting.sortOrder,
-      set: function(order) {this.$store.dispatch('setSortOrder', order);}
+      set: function(order) {
+        this.$store.dispatch("setSortOrder", order);
+      }
     },
     searchBar: {
       get: vm => vm.$store.state.sorting.searching,
-      set: function(input) {this.$store.dispatch('setSearch', input);}
+      set: function(input) {
+        this.$store.dispatch("setSearch", input);
+      }
     },
     currentDirectory: {
       get: vm => vm.$store.getters.getCurrentDirectory,
-      set: function(dir) {this.$store.dispatch('setCurrentDir', dir)}
+      set: function(dir) {
+        this.$store.dispatch("setCurrentDir", dir);
+      }
     },
     isBreadcrumb: {
       get: vm => vm.breadcrumb,
       set: function(value) {
-        this.$store.dispatch('setSearch', '');
+        this.$store.dispatch("setSearch", "");
         this.breadcrumb = value;
       }
     }
-
   }
 };
 </script>
