@@ -1,8 +1,18 @@
 <template>
   <div v-if="isDraggingUploads" class="files" @dragleave="onDragLeave">
-    <Upload :currentFolder="'uploads'" @upload="onUpload" class="dragUploads" dragDrop />
+    <Upload
+      :currentFolder="'uploads'"
+      @upload="onUpload"
+      class="dragUploads"
+      dragDrop
+    />
   </div>
-  <div v-else class="files" @dragenter.prevent="onDragEnter" @dragleave="onDragLeave">
+  <div
+    v-else
+    class="files"
+    @dragenter.prevent="onDragEnter"
+    @dragleave="onDragLeave"
+  >
     <FilesDetails
       v-if="isVisible('VIEW_DETAILS')"
       :data="filesList"
@@ -121,7 +131,7 @@ export default {
       this.rightClickMenu = true;
     },
     onDragEnter: function(event) {
-      console.log(event.dataTransfer)
+      console.log(event.dataTransfer);
       if (event.dataTransfer.types.includes("application/x-moz-file")) {
         this.counterDragUploads++;
       }

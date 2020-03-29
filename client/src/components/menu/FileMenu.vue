@@ -2,7 +2,12 @@
   <aside class="menu">
     <ul class="menu-list">
       <li><Upload v-if="hasUpload" :currentFolder="currentDirectory" /></li>
-      <FileMenuItem v-if="hasPreview" :disabled="!isOne" icon="monitor" @click="preview()">
+      <FileMenuItem
+        v-if="hasPreview"
+        :disabled="!isOne"
+        icon="monitor"
+        @click="preview()"
+      >
         Preview
       </FileMenuItem>
       <FileMenuItem
@@ -20,10 +25,10 @@
 
 <script>
 import { ToastProgrammatic as Toast } from "buefy";
-import { mapState, mapGetters, } from 'vuex'
+import { mapState, mapGetters } from "vuex";
 
 import FileMenuItem from "./FileMenuItem";
-import Upload from './Upload';
+import Upload from "./Upload";
 import PreviewModal from "./PreviewModal";
 
 export default {
@@ -48,16 +53,19 @@ export default {
   },
   computed: {
     currentDirectory: vm => {
-      if (vm.targetFolder === null) return vm.$store.getters.getCurrentDirectory;
+      if (vm.targetFolder === null)
+        return vm.$store.getters.getCurrentDirectory;
       else return vm.targetFolder.p;
     },
     selectedItems: vm => {
-      if (vm.targetFolder === null) return vm.$store.getters.getListSelecedItems;
+      if (vm.targetFolder === null)
+        return vm.$store.getters.getListSelecedItems;
       else return [vm.targetFolder];
     },
     isEmpty: vm => vm.selectedItems.length == 0,
     isOne: vm => vm.selectedItems.length == 1,
-    canCreateFolder: vm => vm.selectedItems.filter(i => i.type == "DIRECTORY").length || vm.isEmpty,
+    canCreateFolder: vm =>
+      vm.selectedItems.filter(i => i.type == "DIRECTORY").length || vm.isEmpty,
     clipboard: vm => vm.$store.state.clipboard.clipboard.length > 0,
     options: vm => {
       return [
@@ -104,7 +112,7 @@ export default {
           click: vm.rename
         }
       ];
-    },
+    }
   },
   methods: {
     notImplemented: function(element) {
@@ -148,27 +156,35 @@ export default {
       });
     },
     cut: function() {
-      this.$store.dispatch('setClipboard', {selection: this.selectedItems, cut: true});
+      this.$store.dispatch("setClipboard", {
+        selection: this.selectedItems,
+        cut: true
+      });
     },
     copy: function() {
-      this.$store.dispatch('setClipboard', {selection: this.selectedItems});
+      this.$store.dispatch("setClipboard", { selection: this.selectedItems });
     },
     paste: function() {
-      this.$store.dispatch('getClipboard').then(files => {
+      this.$store.dispatch("getClipboard").then(files => {
         if (this.$store.state.clipboard.cut) {
-          this.$store.dispatch('move', {target: this.currentDirectory, items: files});
+          this.$store.dispatch("move", {
+            target: this.currentDirectory,
+            items: files
+          });
         } else {
-          this.$store.dispatch('copy', {target: this.currentDirectory, items: files});
+          this.$store.dispatch("copy", {
+            target: this.currentDirectory,
+            items: files
+          });
         }
-      })
+      });
     },
     delete: function() {
       this.$buefy.dialog.confirm({
-        message: 'Are you sure you want to delete these files?',
+        message: "Are you sure you want to delete these files?",
         trapFocus: true,
-        onConfirm: () => this.$store.dispatch('delete', this.selectedItems)
+        onConfirm: () => this.$store.dispatch("delete", this.selectedItems)
       });
-      
     },
     rename: function() {
       this.$buefy.dialog.prompt({
