@@ -1,7 +1,7 @@
 <template>
   <aside class="menu">
     <ul class="menu-list">
-      <Upload v-if="hasUpload" :currentFolder="currentDirectory" />
+      <li><Upload v-if="hasUpload" :currentFolder="currentDirectory" /></li>
       <FileMenuItem v-if="hasPreview" :disabled="!isOne" icon="monitor" @click="preview()">
         Preview
       </FileMenuItem>

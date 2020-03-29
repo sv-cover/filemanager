@@ -1,5 +1,8 @@
 <template>
-  <div class="files">
+  <div v-if="isDraggingUploads" class="files" @dragleave="onDragLeave">
+    <Upload :currentFolder="'uploads'" @upload="onUpload" class="dragUploads" dragDrop />
+  </div>
+  <div v-else class="files" @dragenter.prevent="onDragEnter" @dragleave="onDragLeave">
     <FilesDetails
       v-if="isVisible('VIEW_DETAILS')"
       :data="filesList"
@@ -23,6 +26,7 @@ import FilesDetails from "./FilesDetails";
 import FilesThumbs from "./FilesThumbs";
 import RightClickMenu from "../menu/RightClickMenu";
 import FileMenu from "../menu/FileMenu";
+import Upload from "../menu/Upload";
 
 export default {
   name: "Files",
@@ -30,7 +34,8 @@ export default {
     FilesDetails,
     RightClickMenu,
     FileMenu,
-    FilesThumbs
+    FilesThumbs,
+    Upload
   },
   data() {
     return {
@@ -38,7 +43,8 @@ export default {
       position: {
         top: 0,
         left: 0
-      }
+      },
+      counterDragUploads: 0
     };
   },
   computed: {
@@ -65,7 +71,8 @@ export default {
       set: function(file) {
         this.$store.dispatch("setLastSelected", file);
       }
-    }
+    },
+    isDraggingUploads: vm => vm.counterDragUploads > 0
   },
   methods: {
     isVisible: function(view) {
@@ -112,6 +119,18 @@ export default {
         left: event.x
       };
       this.rightClickMenu = true;
+    },
+    onDragEnter: function(event) {
+      console.log(event.dataTransfer)
+      if (event.dataTransfer.types.includes("application/x-moz-file")) {
+        this.counterDragUploads++;
+      }
+    },
+    onDragLeave: function(event) {
+      this.counterDragUploads--;
+    },
+    onUpload: function(event) {
+      this.counterDragUploads = 0;
     }
   }
 };
@@ -120,6 +139,15 @@ export default {
 <style>
 .files {
   height: 100%;
+  width: 100%;
+}
+.dragUploads,
+.dragUploads .upload.control,
+.dragUploads .upload.control .upload-draggable {
+  height: 100%;
+  width: 100%;
+}
+.dragUploads .upload.control {
   width: 100%;
 }
 </style>

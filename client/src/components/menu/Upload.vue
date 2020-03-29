@@ -1,14 +1,23 @@
 <template>
-      <li>
         <b-field class="file">
-          <b-upload v-model="files" @input="onUpload" multiple>
-            <a>
+          <b-upload v-model="files" @input="onUpload" :drag-drop="dragDrop" multiple>
+                <section v-if="dragDrop" class="section">
+                    <div class="content has-text-centered">
+                        <p>
+                            <b-icon
+                                icon="upload"
+                                size="is-large">
+                            </b-icon>
+                        </p>
+                        <p>Drop your files here</p>
+                    </div>
+                </section>
+            <a v-else>
               <b-icon icon="upload"></b-icon>
               <span>Click to upload</span>
             </a>
           </b-upload>
         </b-field>
-      </li>
 </template>
 
 <script>
@@ -20,11 +29,15 @@ export default {
     };
   },
   props: {
-    currentFolder: String 
+    currentFolder: String,
+    dragDrop: {
+      type: Boolean,
+      default: false
+    }
   },
   methods: {
     onUpload: function(value) {
-      console.log(value);
+      this.$emit('upload', value);
       this.$store.dispatch('uploadFiles', {path: this.currentFolder, files: value}).then(() => {
         this.files = [];
       });
