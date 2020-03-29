@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <TopMenu/>
+    <TopMenu />
     <section class="section main">
       <b-loading :active="isLoadingConfig" />
       <div v-if="!isLoadingConfig" class="mainView">
@@ -32,11 +32,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoadingConfig: 'isLoadingConfig'
-    }),
+      isLoadingConfig: "isLoadingConfig"
+    })
   },
   mounted() {
-    this.$store.dispatch("loadConfig").catch(errorToast);
+    this.$store.dispatch("init");
   }
 };
 </script>

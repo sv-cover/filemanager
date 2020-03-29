@@ -89,18 +89,15 @@ export default {
       return view === this.view;
     },
     clickFile: function(file, modKey) {
-      const isSelected =
-        this.selectedFiles.findIndex(f => f.index == file.index) >= 0;
+      const isSelected = this.selectedFiles.findIndex(f => f.p == file.p) >= 0;
       if (modKey.ctrl && isSelected) {
         this.$store.dispatch("removeSelectedFile", file);
       } else {
         let selected = [file];
         if (modKey.shift && this.lastSelected) {
-          const indexSelected = this.filesList.findIndex(
-            f => f.index == file.index
-          );
+          const indexSelected = this.filesList.findIndex(f => f.p == file.p);
           const indexLastSelected = this.filesList.findIndex(
-            f => f.index == this.lastSelected.index
+            f => f.p == this.lastSelected.p
           );
           const [startIndex, endIndex] =
             indexSelected > indexLastSelected

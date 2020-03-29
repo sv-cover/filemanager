@@ -1,99 +1,140 @@
 import path from "path";
 import api from "../api";
-import { errorToast, expandFile } from "../../utils";
+import { errorToast, expandFile, getIndex } from "../../utils";
 import {
   SET_FILESLIST,
   SET_FILESLIST_LOADING,
   SET_FILESLIST_LASTSELECTED,
-  RENAME_FILE
+  ADD_FILE_FILELIST,
+  REMOVE_FILE_FILELIST,
+  RENAME_FILE_FILELIST
 } from "../mutation-types";
+
+function isInFolder(filePath, folderPath) {
+  console.log(filePath, folderPath);
+  return folderPath === path.dirname(filePath);
+}
+
+function copyFileData(file, target) {
+  return expandFile({
+    p: path.join(target, file.name),
+    t: file.t,
+    s: file.s,
+    h: file.h,
+    w: file.w
+  });
+}
 
 export default {
   state: {
     listFiles: [],
-    isLoading: false,
-    lastSelected: null
+    isLoading: false
   },
   mutations: {
     [SET_FILESLIST](state, files) {
-      state.listFiles = files.map((file, index) => expandFile(file, index));
+      state.listFiles = files.map(file => expandFile(file));
     },
     [SET_FILESLIST_LOADING](state, loading) {
       state.isLoading = loading;
     },
 
-    [RENAME_FILE](state, { file, newName }) {
-      file = state.listFiles[file.index];
-      file.p = path.join(path.dirname(file.p), newName);
+    [ADD_FILE_FILELIST](state, file) {
+      state.listFiles.push(file);
+    },
+    [REMOVE_FILE_FILELIST](state, path) {
+      const index = state.listFiles.findIndex(file => file.p === path);
+      if (index >= 0) state.listFiles.splice(index, 1);
+    },
+    [RENAME_FILE_FILELIST](state, { path, newName }) {
+      const index = getIndex(state.listFiles, path);
+      file = state.listFiles[index];
+      file.p = path.join(path.dirname(path), newName);
       file.name = path.basename(file.p);
       file.ext = path.extname(file.p).slice(1);
     }
   },
   actions: {
-    loadFiles(context, dir) {
+    async loadFiles(context, dir) {
       context.commit(SET_FILESLIST_LASTSELECTED, null);
-      context.commit(SET_FILESLIST, []);
       context.commit(SET_FILESLIST_LOADING, true);
-      return new Promise((resolve, reject) => {
-        api
-          .getFilesList(dir)
-          .then(files => {
-            context.commit(SET_FILESLIST, files);
-            context.commit(SET_FILESLIST_LOADING, false);
-            resolve("success");
-          })
-          .catch(err => {
-            errorToast(err, "Files failed to load.");
-            reject(err);
-          });
-      });
-    },
-
-    uploadFiles(context, { path, files }) {
-      return new Promise((resolve, reject) => {
-        api
-          .uploadFiles(path, files)
-          .then(() => {
-            context.dispatch("loadViewState");
-            resolve("succes");
-          })
-          .catch(err => {
-            errorToast(err, "Files failed to load.");
-            reject(err);
-          });
-      });
-    },
-
-    async moveFiles(context, { target, files }) {
-      for (let i = 0; i < files.length; i++) {
-        await api
-          .moveFile(files[i].p, path.join(target, files[i].name))
-          .catch(err => errorToast(err, "Files failed to move"));
-      }
-    },
-    async copyFiles(context, { target, files }) {
-      for (let i = 0; i < files.length; i++) {
-        await api
-          .copyFile(files[i].p, path.join(target, files[i].name))
-          .catch(err => errorToast(err, "Files failed to copy"));
-      }
-    },
-    async deleteFiles(context, files) {
-      for (let i = 0; i < files.length; i++) {
-        await api.deleteFile(files[i].p);
-      }
-    },
-    renameFile(context, { file, newName }) {
-      if (file.name === newName) return;
-      api
-        .renameFile(file.p, newName)
-        .then(() => {
-          context.commit(RENAME_FILE, { file, newName });
-          resolve("success");
+      await api
+        .getFilesList(dir)
+        .then(files => {
+          context.commit(SET_FILESLIST, files);
+          context.commit(SET_FILESLIST_LOADING, false);
         })
         .catch(err => {
-          errorToast(err, `Failed to rename ${file.name} to ${newName}.`);
-          reject(err);
+          errorToast(err, "File list failed to load.");
+        });
+    },
+
+    async uploadFiles(context, { path, files }) {
+      await api
+        .uploadFiles(path, files)
+        .then(() => {
+          //context.dispatch("loadViewState");
+        })
+        .catch(err => {
+          errorToast(err, "Files failed to load.");
+          throw err;
+        });
+    },
+
+    async moveFile(context, { target, file }) {
+      const newFile = copyFileData(file, target);
+      await api
+        .moveFile(file.p, newFile.p)
+        .then(() => {
+          context.commit(REMOVE_FILE_FILELIST, file.p);
+          if (isInFolder(newFile.p, context.getters.getCurrentDirectory))
+            context.commit(ADD_FILE_FILELIST, newFile);
+        })
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to move ${file.name} to ${target}.`
+          };
+        });
+    },
+    async copyFile(context, { target, file }) {
+      const newFile = copyFileData(file, target);
+
+      await api
+        .copyFile(file.p, newFile.p)
+        .then(() => {
+          if (isInFolder(newFile.p, context.getters.getCurrentDirectory))
+            context.commit(ADD_FILE_FILELIST, newFile);
+        })
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to copy ${file.name} to ${target}.`
+          };
+        });
+    },
+    async deleteFile(context, file) {
+      await api
+        .deleteFile(file.p)
+        .then(() => context.commit(REMOVE_FILE_FILELIST, file))
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to delete ${file.name}.`
+          };
+        });
+    },
+    async renameFile(context, { file, newName }) {
+      if (file.name === newName) return;
+      await api
+        .renameFile(file.p, newName)
+        .then(() => {
+          context.commit(RENAME_FILE_FILELIST, { path: file.p, newName });
+        })
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to rename ${file.name} to ${newName}.`
+          };
         });
     }
   }

@@ -149,8 +149,8 @@ export default {
         },
         trapFocus: true,
         onConfirm: value =>
-          this.$store.dispatch("createDir", {
-            path: this.currentDirectory,
+          this.$store.dispatch("newDir", {
+            target: this.currentDirectory,
             name: value
           })
       });

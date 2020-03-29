@@ -14,7 +14,7 @@
           :key="index"
           @click="clickFile($event, file, index)"
           @contextmenu.stop.prevent="rightClick($event, file)"
-          :class="selected[file.index] ? 'is-selected' : ''"
+          :class="selected[index] ? 'is-selected' : ''"
         >
           <td>
             <span>
@@ -29,7 +29,7 @@
     </table>
 
     <section v-if="isLoading" class="section">
-          <b-progress></b-progress>
+      <b-progress></b-progress>
     </section>
 
     <section v-if="isEmpty" class="section">
@@ -44,9 +44,9 @@
 </template>
 
 <script>
-import { basename } from 'path';
+import { basename } from "path";
 
-import utils from '../../utils';
+import utils from "../../utils";
 
 export default {
   name: "FileDetails",
@@ -73,7 +73,7 @@ export default {
       });
     },
     rightClick: function(event, file = null) {
-      this.$emit('contextmenu', event, file);
+      this.$emit("contextmenu", event, file);
     }
   }
 };
@@ -83,11 +83,11 @@ export default {
 <style scoped lang="scss">
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Opera and Firefox */
 }
 .files-details {

@@ -1,4 +1,3 @@
-import { errorToast } from "../../utils";
 import {
   SET_FILESLIST_SELECTED,
   SET_FILESLIST_SELECT,
@@ -33,8 +32,8 @@ export default {
       );
       return [...dirs, ...files];
     },
-    getBooleanSelectedFiles: (state, getters, rootState) =>
-      rootState.files.listFiles.map(file => state.selected.has(file.p)),
+    getBooleanSelectedFiles: (state, getters) =>
+      getters.getSortedFilesList.map(file => state.selected.has(file.p)),
     isInSelected: state => file => state.selected.has(file.p)
   },
   actions: {

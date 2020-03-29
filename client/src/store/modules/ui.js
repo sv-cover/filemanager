@@ -34,20 +34,15 @@ export default {
     }
   },
   actions: {
-    loadConfig(context) {
-      return new Promise((resolve, reject) => {
-        api
-          .getConfig()
-          .then(config => {
-            context.commit(SET_CONFIG, config);
-            context.dispatch("loadDirList");
-            resolve("success");
-          })
-          .catch(err => {
-            errorToast(err, "UI failed to load.");
-            reject(err);
-          });
-      });
+    async loadConfig(context) {
+      await api
+        .getConfig()
+        .then(config => {
+          context.commit(SET_CONFIG, config);
+        })
+        .catch(err => {
+          throw { msg: "UI config failed to load", err: err };
+        });
     },
     setView(context, view) {
       context.commit(SET_VIEW, view);

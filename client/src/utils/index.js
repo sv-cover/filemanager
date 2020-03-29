@@ -1,5 +1,5 @@
 import { ToastProgrammatic as Toast } from "buefy";
-import path from 'path';
+import path from "path";
 
 export function APIError({ message, url, status, response }) {
   this.name = "APIError";
@@ -21,7 +21,13 @@ export function APIError({ message, url, status, response }) {
   };
 }
 
-export function fetchData(url, method = "POST", body = null, mulitForm=false, expectJSON = true) {
+export function fetchData(
+  url,
+  method = "POST",
+  body = null,
+  mulitForm = false,
+  expectJSON = true
+) {
   /**
    * Wrapper function for fetch. If expectJSON is true or unset, the result is expected to be json.
    */
@@ -61,8 +67,8 @@ export function fetchData(url, method = "POST", body = null, mulitForm=false, ex
   });
 }
 
-export function errorToast(err, msg = null) {
-  console.error(err);
+export function errorToast({ err, msg = null }) {
+  console.error(msg, err);
   Toast.open({
     duration: 3000,
     message: "Error: " + msg != null ? msg : err.toString(),
@@ -85,17 +91,7 @@ export function formatFileDate(date) {
 }
 
 export function formatFileSize(sizeInBytes) {
-  const byteUnits = [
-    "B",
-    "kB",
-    " MB",
-    " GB",
-    " TB",
-    "PB",
-    "EB",
-    "ZB",
-    "YB"
-  ];
+  const byteUnits = ["B", "kB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"];
   let i = 0;
   for (i = 0; i < byteUnits.length; i++) {
     if (sizeInBytes < 1024) break;
@@ -105,17 +101,33 @@ export function formatFileSize(sizeInBytes) {
 }
 
 export function isImage(fileType) {
-  return fileType.toLowerCase().match('(jpeg|jpg|gif|png)') != null;
+  return fileType.toLowerCase().match("(jpeg|jpg|gif|png)") != null;
 }
 
-export function expandFile(file, index, selected = false) {
-  return {...file, ...{
-    type: "FILE",
-    index: index,
-    selected: selected,
-    name: path.basename(file.p),
-    ext: path.extname(file.p).slice(1)
-  }};
+export function expandFile(file, selected = false) {
+  return {
+    ...file,
+    ...{
+      type: "FILE",
+      selected: selected,
+      name: path.basename(file.p),
+      ext: path.extname(file.p).slice(1)
+    }
+  };
 }
 
-export default { APIError, fetchData, errorToast, formatApiUrL, formatFileDate, formatFileSize, isImage, expandFile };
+export function getIndex(itemList, path) {
+  return itemList.findIndex(item => item.p === path);
+}
+
+export default {
+  APIError,
+  fetchData,
+  errorToast,
+  formatApiUrL,
+  formatFileDate,
+  formatFileSize,
+  isImage,
+  expandFile,
+  getIndex
+};

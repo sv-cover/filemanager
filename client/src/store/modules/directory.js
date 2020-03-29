@@ -2,7 +2,11 @@ import path from "path";
 
 import { errorToast } from "../../utils";
 import api from "../api";
-import { SET_DIRLIST, SET_CURRENT_DIR, SET_DIRLIST_LOADING } from "../mutation-types";
+import {
+  SET_DIRLIST,
+  SET_CURRENT_DIR,
+  SET_DIRLIST_LOADING
+} from "../mutation-types";
 
 function expandFolder(folders) {
   return folders.map(folder => {
@@ -14,7 +18,7 @@ function expandFolder(folders) {
 }
 
 function folderExists(folder, folderList) {
-  if (folderList.length == 0) return false; 
+  if (folderList.length == 0) return false;
   return folderList.some(f => {
     if (folder === f.p) return true;
     return folderExists(folder, f.c);
@@ -23,20 +27,17 @@ function folderExists(folder, folderList) {
 
 export default {
   state: {
-    currentDirectory: '',
+    currentDirectory: "",
     listDirectories: [],
     isLoading: false
   },
   mutations: {
     [SET_DIRLIST](state, directories) {
       state.listDirectories = expandFolder(directories);
-      if (!folderExists(state.currentDirectory, directories)) {
-        if (state.listDirectories.length > 0) state.currentDirectory = state.listDirectories[0].p;
-        else state.currentDir = '';
-      }
     },
     [SET_CURRENT_DIR](state, currentDir) {
-      if (folderExists(currentDir, state.listDirectories)) state.currentDirectory = currentDir;
+      if (folderExists(currentDir, state.listDirectories))
+        state.currentDirectory = currentDir;
       else throw new Error(currentDir + " does not exist");
     },
     [SET_DIRLIST_LOADING](state, loading) {
@@ -47,53 +48,74 @@ export default {
     getCurrentDirectory: state => state.currentDirectory
   },
   actions: {
-    loadDirList(context) {
-      return new Promise((resolve, reject) => {
-        api
-          .getDirList()
-          .then(dirList => {
-            context.commit(SET_DIRLIST, dirList);
-            resolve("success");
-          })
-          .catch(err => {
-            errorToast(err, 'Directory tree failed to load.');
-            reject(err);
-          });
-      });
+    async loadDirList(context) {
+      await api
+        .getDirList()
+        .then(dirList => {
+          context.commit(SET_DIRLIST, dirList);
+          if (!folderExists(context.state.currentDirectory, dirList)) {
+            let currentDir = "";
+            if (dirList.length > 0) currentDir = dirList[0].p;
+            context.dispatch("setCurrentDir", currentDir);
+          }
+        })
+        .catch(err => {
+          throw { msg: "Directory tree failed to load.", err };
+        });
     },
     setCurrentDir(context, dir) {
-      context.commit(SET_CURRENT_DIR, dir);
-      context.dispatch('setSelectedFiles', []);
-      context.dispatch('setLastSelected', null);
-      context.dispatch('loadFiles', dir);
+      if (context.state.currentDirectory !== dir) {
+        context.commit(SET_CURRENT_DIR, dir);
+        context.dispatch("setSelectedFiles", []);
+        context.dispatch("setLastSelected", null);
+        context.dispatch("loadFiles", dir);
+      }
     },
 
-    createDir(context, {path, name}) {
-      api.createDir(path, name).then(() => {
-        context.dispatch('loadViewState');
-      }).catch(err => errorToast(err, "Failed to create directory"));
+    async createDir(context, { path, name }) {
+      await api.createDir(path, name).catch(err => {
+        throw {
+          err: err,
+          msg: `Failed to create ${name}.`
+        };
+      });
     },
-    async moveDirs(context, { directories, target }) {
-      for (let i = 0; i < directories.length; i++) {
-        await api.moveDir(directories[i].p, path.join(target, directories[i].name)).catch(err => errorToast(err, "Failed to move dir"));
-      }
+    async moveDir(context, { directory, target }) {
+      await api
+        .moveDir(directory.p, path.join(target, directory.name))
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to move ${file.name} to ${target}.`
+          };
+        });
     },
-    async copyDirs(context, { directories, target }) {
-      for (let i = 0; i < directories.length; i++) {
-        await api.copyDir(directories[i].p, path.join(target, directories[i].name)).catch(err => errorToast(err, "Failed to copy dir"));
-      }
+    async copyDir(context, { directory, target }) {
+      await api
+        .copyDir(directory.p, path.join(target, directory.name))
+        .catch(err => {
+          throw {
+            err: err,
+            msg: `Failed to copy ${file.name} to ${target}.`
+          };
+        });
     },
-    async deleteDirs(context, directories) {
-      for (let i = 0; i < directories.length; i++) {
-        await api.deleteDir(directories[i].p).catch(err => errorToast(err, "Failed to delete dir"));
-      }
+    async deleteDir(context, directory) {
+      await api.deleteDir(directory.p).catch(err => {
+        throw {
+          err: err,
+          msg: `Failed to delete ${file.name}.`
+        };
+      });
     },
-    renameDir(context, {dir, newName}) {
-      api.renameDir(dir.p, newName).then(() => {
-        context.dispatch('loadDirList');
-      }).catch(err => errorToast(err, "Failed to create directory"));
-    },
+    async renameDir(context, { dir, newName }) {
+      await api.renameDir(dir.p, newName).catch(err => {
+        throw {
+          err: err,
+          msg: `Failed to rename ${file.name} to ${newName}.`
+        };
+      });
+    }
   },
-  modules: {
-  }
-}
+  modules: {}
+};
