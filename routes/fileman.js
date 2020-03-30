@@ -179,13 +179,14 @@ storage._handleFile = customDiskStorage;
 function fileFilter(req, file, cb) {
   const fileType = path.extname(file.originalname).replace(/^./, '').toLowerCase();
   if(!utils.fileFolderAccess(req.session, req.body.d)) {
-    cb(new Error('Upload directory not allowed.'));
+    cb(new Error('Upload directory not allowed.'), false);
   } else if(config.ALLOWED_UPLOADS !== undefined && config.ALLOWED_UPLOADS !== '' && !config.ALLOWED_UPLOADS.includes(fileType)) {
-    cb(new Error('File extension on not allowed uploads list.'));
+    cb(new Error('File extension on not allowed uploads list.'), false);
   } else if (config.FORBIDDEN_UPLOADS !== undefined && config.FORBIDDEN_UPLOADS !== '' && config.FORBIDDEN_UPLOADS.includes(fileType)) {
-    cb(new Error('File extension on forbidden uploads list.'));
+    cb(new Error('File extension on forbidden uploads list.'), false);
+  } else {
+    cb(null, true);
   }
-  cb(null, true);
 }
 
 var upload = multer({ storage: storage, fileFilter: fileFilter }).array('files[]');
@@ -193,7 +194,7 @@ router.post('/upload', function(req, res) {
   upload(req, res, function (err) {
     if (err) {
       console.warn(err);
-      res.send({ res:"error", msg: err.toString() });
+      res.status(403).send({ res:"error", msg: err.toString() });
     }
     else{
       res.send({ res: "ok", msg: "Success" });  

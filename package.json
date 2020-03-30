@@ -10,7 +10,8 @@
     "ignore": [
       "test/*",
       "cachestorage/*",
-      "client/*"
+      "client/*",
+      "public/uploads/*"
     ]
   },
   "dependencies": {

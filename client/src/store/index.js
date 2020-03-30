@@ -56,8 +56,8 @@ export default new Vuex.Store({
           return { path: path, file: file }
         }),
         onFinish: () => {
-          context.dispatch("loadDirList");
-          context.dispatch("loadFiles", context.getters.getCurrentDirectory);
+          //context.dispatch("loadDirList");
+          //context.dispatch("loadFiles", context.getters.getCurrentDirectory);
         }
       });
     },
