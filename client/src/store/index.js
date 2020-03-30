@@ -8,7 +8,6 @@ import sorting from "./modules/sorting";
 import selection from "./modules/selection";
 import clipboard from "./modules/clipboard";
 import jobs from "./modules/jobs";
-import { SET_DIRLIST } from "./mutation-types";
 
 Vue.use(Vuex);
 
@@ -47,6 +46,20 @@ export default new Vuex.Store({
           context.dispatch("loadDirList");
         })
         .catch(errorToast);
+    },
+    upload(context, { path, files }) {
+      const msg = `uploading ${files.length} files to ${path}`;
+
+      context.dispatch("processUpload", {
+        message: msg,
+        files: files.map(file => {
+          return { path: path, file: file }
+        }),
+        onFinish: () => {
+          context.dispatch("loadDirList");
+          context.dispatch("loadFiles", context.getters.getCurrentDirectory);
+        }
+      });
     },
     newDir(context, { target, name }) {
       const items = [{ path: target, name: name, type: "DIRECTORY" }];

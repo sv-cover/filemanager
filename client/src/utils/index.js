@@ -31,14 +31,14 @@ export function fetchData(
   /**
    * Wrapper function for fetch. If expectJSON is true or unset, the result is expected to be json.
    */
-  var headers = undefined;
+  let headers = undefined;
   if (!mulitForm) {
     headers = new Headers({
       "Content-Type": "application/json"
     });
   } else {
   }
-  var init = {
+  let init = {
     method: method,
     headers: headers
   };
@@ -47,7 +47,7 @@ export function fetchData(
   else init["body"] = body;
 
   return fetch(url, init).then(response => {
-    var contentType = response.headers.get("content-type");
+    let contentType = response.headers.get("content-type");
     if (!response.ok)
       throw new APIError({
         url,
@@ -65,6 +65,24 @@ export function fetchData(
       response: response.text()
     });
   });
+}
+
+function test(event) {
+  console.log(event)
+}
+
+export function uploadForm(url, formData, onProgress = null) {
+  return new Promise((resolve, reject) => {
+    let http = new XMLHttpRequest();
+    
+    http.upload.addEventListener("progress", onProgress !== null ? onProgress : () => {}, false);
+    http.addEventListener("load", resolve, false);
+    http.addEventListener("error", reject, false);
+    http.addEventListener("abort", reject, false);
+  
+    http.open("POST", url, true);
+    http.setRequestHeader("Accept", "*/*");
+    http.send(formData);});
 }
 
 export function errorToast({ err, msg = null }) {
@@ -123,6 +141,7 @@ export function getIndex(itemList, path) {
 export default {
   APIError,
   fetchData,
+  uploadForm,
   errorToast,
   formatApiUrL,
   formatFileDate,

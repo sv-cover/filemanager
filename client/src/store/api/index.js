@@ -1,5 +1,5 @@
 import store from "../index";
-import { fetchData } from "../../utils";
+import { fetchData, uploadForm } from "../../utils";
 
 export default {
   getConfig() {
@@ -37,15 +37,13 @@ export default {
     });
   },
 
-  uploadFiles(path, files) {
+  upload(path, file, onProgress) {
     const form = new FormData();
     form.set("action", "upload");
     form.set("method", "ajax");
     form.set("d", path);
-    for (const index in files) {
-      form.append("files[]", files[index], files[index].name);
-    }
-    return fetchData(store.state.ui.config.UPLOAD, "POST", form, true);
+    form.append("files[]", file, file.name);
+    return uploadForm(store.state.ui.config.UPLOAD, form, onProgress);
   },
   downloadFile(path) {
     return fetchData(store.state.ui.config.DOWNLOAD, "POST", { f: path });

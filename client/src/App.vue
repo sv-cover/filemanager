@@ -4,7 +4,7 @@
     <section class="section main">
       <b-loading :active="isLoadingConfig" />
       <div v-if="!isLoadingConfig" class="mainView">
-        <div class="folder has-background-light column is-one-quarter">
+        <div class="folder has-background-light column is-one-fifth">
           <Folders />
         </div>
         <div class="files column">

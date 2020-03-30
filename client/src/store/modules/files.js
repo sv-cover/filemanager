@@ -11,7 +11,6 @@ import {
 } from "../mutation-types";
 
 function isInFolder(filePath, folderPath) {
-  console.log(filePath, folderPath);
   return folderPath === path.dirname(filePath);
 }
 
@@ -68,15 +67,18 @@ export default {
         });
     },
 
-    async uploadFiles(context, { path, files }) {
+    async uploadFiles(context, { path, file, onProgress }) {
       await api
-        .uploadFiles(path, files)
-        .then(() => {
+        .upload(path, file, onProgress)
+        .then((event) => {
+          //console.log(event);
           //context.dispatch("loadViewState");
         })
         .catch(err => {
-          errorToast(err, "Files failed to load.");
-          throw err;
+          throw {
+            err: err,
+            msg: `Failed to upload ${file.name} to ${path}.`
+          };
         });
     },
 

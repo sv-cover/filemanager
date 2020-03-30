@@ -36,7 +36,7 @@ export default {
     onUpload: function(value) {
       this.$emit("upload", value);
       this.$store
-        .dispatch("uploadFiles", { path: this.currentFolder, files: value })
+        .dispatch("upload", { path: this.currentFolder, files: value })
         .then(() => {
           this.files = [];
         });
