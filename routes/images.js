@@ -51,6 +51,20 @@ router.get('/resize', function(req, res) {
   }
 });
 
+/* Return image size as {width, height} */
+router.get('/size', function(req, res) {
+  const query = req.query;
+  
+  if (query.f !== undefined) {
+    const filePath = path.join(serverRoot, query.f);
+    const image = gm(filePath);
+    image.size((err, value) => res.send(value));
+  } else {
+    console.warn(req.url + ' missing query arguments.');
+    res.status(400).send('Missing query arguments.');
+  }
+});
+
 /* Generate thumbnail */
 router.get('/generatethumb', function(req, res) {
   const query = req.query;
