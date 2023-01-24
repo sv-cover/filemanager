@@ -1,0 +1,45 @@
+options:
+  docker: true
+
+definitions:
+  steps:
+    - step: &build-image
+        name: Build Docker image
+        script:
+          - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+          - docker build . --file Dockerfile --tag ${IMAGE_NAME}
+          - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+        services:
+          - docker
+        caches:
+          - docker
+        artifacts:
+          - "*.tar"
+    - step: &push-gcp
+        name: Push to GCP registry
+        image: google/cloud-sdk:alpine
+        script:
+          - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+          - docker load --input "${IMAGE_NAME}.tar"
+          # Authenticating with the service account key file
+          - echo $GCLOUD_API_KEYFILE > ./gcloud-api-key.json
+          - gcloud auth activate-service-account --key-file gcloud-api-key.json
+          - gcloud config set project $GCLOUD_PROJECT
+          # Tag container & push
+          - VERSION="prod-0.1.${BITBUCKET_BUILD_NUMBER}"
+          - IMAGE="eu.gcr.io/${GCLOUD_PROJECT}/${IMAGE_NAME}"
+          - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+          # Login to google docker hub
+          - cat ./gcloud-api-key.json | docker login -u _json_key --password-stdin https://eu.gcr.io
+          - docker push "${IMAGE}:${VERSION}"
+
+pipelines:
+  tags:
+    v*:
+      - step: *build-image
+      - step: *push-gcp
+
+  branches:
+    master:
+      - step: *build-image
+      - step: *push-gcp
