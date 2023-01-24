@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: filemanager-redis
+    expose:
+      - 6379
+    networks:
+      - filemanager
+
+  filemanager:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    ports:
+      - "3000:3000"
+    command: "npm run serve"
+    volumes:
+      - ./cache:/usr/src/app/cache
+      - ./cachestorage:/usr/src/app/cachestorage
+      - ./client:/usr/src/app/client
+      - ./config:/usr/src/app/config
+      - ./coverapi:/usr/src/app/coverapi
+      - ./public:/usr/src/app/public
+      - ./public/uploads:/usr/src/app/public/uploads
+      - ./routes:/usr/src/app/routes
+      - ./views:/usr/src/app/views
+      - ./app:/usr/src/app/app
+    networks:
+      - filemanager
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "svcover.localhost:host-gateway"
+      - "www.svcover.localhost:host-gateway"
+
+networks:
+  filemanager:

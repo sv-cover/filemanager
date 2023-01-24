@@ -12,3 +12,4 @@ cachestorage/*
 #test scripts
 *.ps1
 *.sh
+config/secrets.js
