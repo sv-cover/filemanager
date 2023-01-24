@@ -12,14 +12,14 @@ const utils = require('./utils');
 const serverRoot = path.join('.', config.SERVER_ROOT);
 
 // A middleware function to check if the user is in a cover committee.
-router.use('/', function(req, res, next) {
+function coverAccessControl(req, res, next) {
   if (utils.isCommitteeMember(req.session)) {
     next();
   } else {
     console.warn('ID' + req.session.id + 'tried to access the filemanager and has no access.');
     res.status(403).send('You are not allowed to access to the Cover Fileman API');
   }
-});
+}
 
 // A middleware function that checks if you have access to the file or directory in the query.
 function fDAccessControl(req, res, next) {
@@ -39,6 +39,9 @@ function nAccessControl(req, res, next) {
   }
 }
 
+// Adds the coverAccessControl middleware to all routes in fileman.js except for dirlist and upload
+router.use('/', utils.unless(coverAccessControl, '/dirlist'));
+
 // Adds the fDAccessControl middleware to all routes in fileman.js except for dirlist and upload
 router.use('/', utils.unless(fDAccessControl, '/dirlist', '/upload'));
 
@@ -48,6 +51,12 @@ For admins it returns the route.
 For committee members only there committee folders.
 */
 router.post('/dirlist', function(req, res) {
+  if (!req.session.user) {
+    // No user, so not allowed to see anything
+    res.send([]);
+    return;
+  }
+
   let response = [];
   let filesRoot = config.UPLOADS_FOLDER;
   let committees = req.session.user.committees;
@@ -57,8 +66,17 @@ router.post('/dirlist', function(req, res) {
   } else {
     for (committeeID in committees) {
       let responseTemp = [];
-      
-      getDirectories(path.join(filesRoot, committeeID), responseTemp);
+      const dir = path.join(filesRoot, committeeID);
+      try {
+        getDirectories(dir, responseTemp);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          // Create directory if it doesn't exist
+          fs.mkdirSync(path.join(serverRoot, dir), {recursive: true});
+        } else {
+          throw error;
+        }
+      }
       response = response.concat(responseTemp);
     }
   }

@@ -15,7 +15,7 @@ utils.unless = function(middleware, ...paths) {
 
 // Checks if cover member in session is a committee member
 utils.isCommitteeMember = function(session) {
-  return session && !Array.isArray(session.user.committees) && Object.entries(session.user.committees).length;
+  return session && session.user && !Array.isArray(session.user.committees) && Object.entries(session.user.committees).length;
 }
 
 // Checks if the cover member in session is an admin. Admins are defined in the config file.
