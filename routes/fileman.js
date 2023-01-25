@@ -51,7 +51,7 @@ For admins it returns the route.
 For committee members only there committee folders.
 */
 router.post('/dirlist', function(req, res) {
-  if (!req.session.user) {
+  if (!req.session || !req.session.user) {
     // No user, so not allowed to see anything
     res.send([]);
     return;
